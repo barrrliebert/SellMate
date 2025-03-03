@@ -121,6 +121,15 @@ export default function Register() {
                                 required
                             />
                             <InputError message={errors.password} className="mt-2" />
+                            <div className="mt-2 text-xs text-gray-500">
+                                Password harus memenuhi kriteria berikut:
+                                <ul className="list-disc list-inside mt-1">
+                                    <li>Minimal 8 karakter</li>
+                                    <li>Mengandung huruf besar dan kecil</li>
+                                    <li>Mengandung angka</li>
+                                    <li>Mengandung simbol (!@#$%^&*)</li>
+                                </ul>
+                            </div>
                         </div>
 
                         {/* Tombol Log in & Register dengan lebar sesuai input */}

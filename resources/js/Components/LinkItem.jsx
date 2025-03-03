@@ -1,7 +1,7 @@
 import React from 'react'
 import { clsx } from 'clsx';
 import { Link, usePage } from '@inertiajs/react'
-export default function LinkItem({href, icon, link, access, title, sidebarOpen, ...props}) {
+export default function LinkItem({href, icon, link, access, title, sidebarOpen, active, ...props}) {
 
     // destruct url from usepage
     const { url } = usePage();
@@ -24,12 +24,12 @@ export default function LinkItem({href, icon, link, access, title, sidebarOpen, 
                     sidebarOpen ?
                         <Link
                             href={href}
-                            className={clsx(sideOpen, url.startsWith(href) && sideActive)} {...props}
+                            className={clsx(sideOpen, (active !== undefined ? active : url === href) && sideActive)} {...props}
                         >
                             {icon} {title}
                         </Link>
                     :
-                        <Link href={href} className={clsx(sideClose, url.startsWith(href) && sideActive)} {...props}>
+                        <Link href={href} className={clsx(sideClose, (active !== undefined ? active : url === href) && sideActive)} {...props}>
                             {icon}
                         </Link>
                 :
