@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Menu, Transition  } from '@headlessui/react'
 import { Link, usePage } from '@inertiajs/react'
 import ProfileEditModal from '@/Components/ProfileEditModal';
-import { IconLogout, IconUserCog, IconAlignLeft } from '@tabler/icons-react'
+import { IconLogout, IconUserCog, IconAlignLeft, IconCategory2, IconBrandZoom, IconBook } from '@tabler/icons-react'
 import { useForm } from '@inertiajs/react'
 import MenuLink from '@/Utils/Menu'
 import LinkItem from './LinkItem'
@@ -55,6 +55,10 @@ export default function AuthDropdown({auth, isMobile, toggleSidebar}) {
 
         post(route('logout'));
     }
+
+    // Check if user has users-access role
+    const isUserAccess = auth.user.roles.some(role => role.name === 'users-access');
+    const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
 
     return (
         <>
@@ -130,52 +134,91 @@ export default function AuthDropdown({auth, isMobile, toggleSidebar}) {
                         </Transition>
                     </Menu>
 
-                    <button className='absolute left-5 text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-slate-700 rounded-full p-2' onClick={() => setIsToggle(!isToggle)}
-                    >
-                        <IconAlignLeft size={18} strokeWidth={1.5}/>
-                    </button>
-                    <div className={`${isToggle ?'translate-x-0 opacity-100' : '-translate-x-full'} fixed top-0 left-0 z-50 w-[165px] h-full transition-all duration-300 transform border-r bg-white dark:bg-gray-950 dark:border-gray-900`}>
-                        <div className="flex justify-center items-center px-6 py-2 h-16">
-                            <div className="text-lg font-bold text-center leading-loose tracking-wider text-gray-900 dark:text-gray-200 mr-2">
-                                SellMate
-                            </div>
-                            <button className='flex text-gray-700 dark:text-gray-400' onClick={() => setIsToggle(!isToggle)}
-                            >
-                                <IconAlignLeft size={18} strokeWidth={1.5}/>
-                            </button>
-                        </div>
-                        <div className="w-full flex flex-col overflow-y-auto">
-                            {menuNavigation.map((item, index) => (
-                                <div key={index}>
-                                    <div className="text-gray-500 text-xs py-3 px-4 font-bold uppercase">
-                                        {item.title}
+                    {isUserAccess ? (
+                        // Speed Dial for users-access
+                        <div className="fixed left-8 top-6 z-50">
+                            <div className="relative">
+                                {/* Container with background */}
+                                <div className={`absolute -inset-3 bg-purple-500 rounded-full transition-all duration-300 ${isSpeedDialOpen ? 'h-[160px]' : 'h-[44px]'}`}></div>
+                                
+                                {/* Speed Dial Options */}
+                                <div className={`absolute top-full left-0 w-full transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0 pt-2 pb-2' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+                                    <div className="space-y-3 flex flex-col items-center">
+                                        <Link href="/apps/video" className="flex flex-col items-center gap-1 text-white hover:scale-110 transition-transform">
+                                            <IconBrandZoom size={20} strokeWidth={1.5} />
+                                            <span className="text-[10px] font-medium">Video</span>
+                                        </Link>
+                                        <Link href="/apps/artikel" className="flex flex-col items-center gap-1 text-white hover:scale-110 transition-transform">
+                                            <IconBook size={20} strokeWidth={1.5} />
+                                            <span className="text-[10px] font-medium">Artikel</span>
+                                        </Link>
                                     </div>
-                                    {item.details.map((detail, indexDetail) => (
-                                        detail.hasOwnProperty('subdetails') ?
-                                        <LinkItemDropdown
-                                            key={indexDetail}
-                                            title={detail.title}
-                                            icon={detail.icon}
-                                            data={detail.subdetails}
-                                            access={detail.permissions}
-                                            sidebarOpen={true}
-                                            onClick={() => setIsToggle(!isToggle)}
-                                        />
-                                        :
-                                        <LinkItem
-                                            key={indexDetail}
-                                            title={detail.title}
-                                            icon={detail.icon}
-                                            href={detail.href}
-                                            access={detail.permissions}
-                                            sidebarOpen={true}
-                                            onClick={() => setIsToggle(!isToggle)}
-                                        />
-                                    ))}
                                 </div>
-                            ))}
+
+                                {/* Main Button - now relative to stay on top */}
+                                <button
+                                    onClick={() => setIsSpeedDialOpen(!isSpeedDialOpen)}
+                                    className={`relative text-white transition-all duration-200 hover:scale-110 ${isSpeedDialOpen ? 'rotate-45' : ''}`}
+                                >
+                                    <IconCategory2 size={20} strokeWidth={1.5} />
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        // Original button for other roles
+                        <button 
+                            className='absolute left-5 text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-slate-700 rounded-full p-2' 
+                            onClick={() => setIsToggle(!isToggle)}
+                        >
+                            <IconAlignLeft size={18} strokeWidth={1.5}/>
+                        </button>
+                    )}
+
+                    {/* Sidebar for non-user roles */}
+                    {!isUserAccess && (
+                        <div className={`${isToggle ?'translate-x-0 opacity-100' : '-translate-x-full'} fixed top-0 left-0 z-50 w-[165px] h-full transition-all duration-300 transform border-r bg-white dark:bg-gray-950 dark:border-gray-900`}>
+                            <div className="flex justify-center items-center px-6 py-2 h-16">
+                                <div className="text-lg font-bold text-center leading-loose tracking-wider text-gray-900 dark:text-gray-200 mr-2">
+                                    SellMate
+                                </div>
+                                <button className='flex text-gray-700 dark:text-gray-400' onClick={() => setIsToggle(!isToggle)}
+                                >
+                                    <IconAlignLeft size={18} strokeWidth={1.5}/>
+                                </button>
+                            </div>
+                            <div className="w-full flex flex-col overflow-y-auto">
+                                {menuNavigation.map((item, index) => (
+                                    <div key={index}>
+                                        <div className="text-gray-500 text-xs py-3 px-4 font-bold uppercase">
+                                            {item.title}
+                                        </div>
+                                        {item.details.map((detail, indexDetail) => (
+                                            detail.hasOwnProperty('subdetails') ?
+                                            <LinkItemDropdown
+                                                key={indexDetail}
+                                                title={detail.title}
+                                                icon={detail.icon}
+                                                data={detail.subdetails}
+                                                access={detail.permissions}
+                                                sidebarOpen={true}
+                                                onClick={() => setIsToggle(!isToggle)}
+                                            />
+                                            :
+                                            <LinkItem
+                                                key={indexDetail}
+                                                title={detail.title}
+                                                icon={detail.icon}
+                                                href={detail.href}
+                                                access={detail.permissions}
+                                                sidebarOpen={true}
+                                                onClick={() => setIsToggle(!isToggle)}
+                                            />
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

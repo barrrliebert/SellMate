@@ -4,6 +4,7 @@ import { useForm } from '@inertiajs/react';
 import Input from '@/Components/Input';
 import Button from '@/Components/Button';
 import toast from 'react-hot-toast';
+import QuantityInput from '@/Components/QuantityInput';
 
 export default function OmzetModal({ isOpen, onClose, product }) {
     const [isAnimating, setIsAnimating] = useState(false);
@@ -106,12 +107,11 @@ export default function OmzetModal({ isOpen, onClose, product }) {
                                 readOnly
                             />
                             <div className="space-y-1">
-                                <Input
-                                    type="number"
+                                <QuantityInput
                                     label="Jumlah produk terjual"
-                                    placeholder="Masukkan jumlah produk"
-                                    value={data.jumlah_omzet}
-                                    onChange={e => setData('jumlah_omzet', e.target.value)}
+                                    value={parseInt(data.jumlah_omzet) || 1}
+                                    onChange={value => setData('jumlah_omzet', value)}
+                                    min={1}
                                     errors={errors.jumlah_omzet}
                                 />
                                 {data.jumlah_omzet > 0 && (

@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link } from '@inertiajs/react';
 import ProfileEditModal from '@/Components/ProfileEditModal';
-import { IconSquareRoundedPlusFilled } from '@tabler/icons-react';
+import { IconPlus, IconTarget, IconCoin } from '@tabler/icons-react';
 import AverageRevenue from './AverageRevenue';
 import TransactionRecord from './TransactionRecord';
 import CommissionRecord from './CommissionRecord';
 import TopRevenue from './TopRevenue';
+import TargetProgress from './TargetProgress';
 
 export default function Index({ user }) {
     const [showEditModal, setShowEditModal] = useState(false);
+    const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
 
     return (
         <>
@@ -28,18 +30,42 @@ export default function Index({ user }) {
             <div className="lg:py-6 relative">
                 <div className="max-w-7xl mx-auto px-0 md:px-4 lg:px-6 space-y-6">
                     <AverageRevenue />
-                    <TransactionRecord />
-                    <CommissionRecord />
-                    <TopRevenue />
+                    <div className="mx-auto px-4 lg:px-0 space-y-6">
+                        <TargetProgress />
+                        <TopRevenue />
+                        <TransactionRecord />
+                        <CommissionRecord />
+                    </div>
                 </div>
 
-                {/* Floating Action Button - only visible on mobile */}
-                <Link
-                    href="/apps/user-dashboard/omzet"
-                    className="md:hidden fixed bottom-6 right-6 bg-gray-300 shadow hover:bg-gray-800 text-gray-700 hover:text-white rounded-full p-3 transition-all duration-200 hover:scale-110"
-                >
-                    <IconSquareRoundedPlusFilled size={28} />
-                </Link>
+                {/* Speed Dial - only visible on mobile */}
+                <div className="md:hidden fixed bottom-6 right-6 z-50">
+                    <div className="relative">
+                        {/* Speed Dial Options */}
+                        <div className={`absolute bottom-full right-0 mb-4 space-y-2 transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                            <Link
+                                href="/apps/user-dashboard/target/edit"
+                                className="flex items-center gap-2 bg-purple-700 text-white p-2.5 rounded-full shadow-lg hover:bg-purple-800 transition-colors"
+                            >
+                                <IconTarget size={32} />
+                            </Link>
+                            <Link
+                                href="/apps/user-dashboard/omzet"
+                                className="flex items-center gap-2 bg-purple-700 text-white p-2.5 rounded-full shadow-lg hover:bg-purple-800 transition-colors"
+                            >
+                                <IconCoin size={32} />
+                            </Link>
+                        </div>
+
+                        {/* Main Button */}
+                        <button
+                            onClick={() => setIsSpeedDialOpen(!isSpeedDialOpen)}
+                            className={`bg-purple-500 shadow hover:bg-purple-800 text-white hover:text-white rounded-full p-3 transition-all duration-200 hover:scale-110 ${isSpeedDialOpen ? 'bg-purple-800 text-white rotate-45' : ''}`}
+                        >
+                            <IconPlus size={28} />
+                        </button>
+                    </div>
+                </div>
 
                 <ProfileEditModal
                     show={showEditModal}

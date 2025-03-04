@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import AppLayout from '@/Layouts/AppLayout';
 import { Head, Link } from '@inertiajs/react';
-import { IconPackage, IconUser, IconArrowLeft } from '@tabler/icons-react';
+import { IconPackage, IconUser, IconChevronLeft } from '@tabler/icons-react';
+import axios from 'axios';
 
 export default function Detail({ type }) {
     const [data, setData] = useState([]);
@@ -245,28 +245,26 @@ export default function Detail({ type }) {
         <>
             <Head title={titles[type]} />
             
-            <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div className=" overflow-hidden sm:rounded-lg">
-                    <div className="">
-                        <div className="flex items-center justify-between mb-6">
-                            <Link
-                                href="/apps/user-dashboard"
-                                className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-                            >
-                                <IconArrowLeft size={24} />
-                            </Link>
-                            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex-1 text-center">
-                                {titles[type]}
-                            </h2>
-                            <div className="w-6"></div>
-                        </div>
-                        
-                        {renderContent()}
+            <div className="min-h-screen bg-white dark:bg-gray-950">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
+                    <div className="flex items-center gap-4 mb-6">
+                        <Link
+                            href={route('apps.user.dashboard')}
+                            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                            <IconChevronLeft size={24} strokeWidth={1.5} />
+                        </Link>
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                            {titles[type]}
+                        </h2>
                     </div>
+                    
+                    {renderContent()}
                 </div>
             </div>
         </>
     );
 }
 
-Detail.layout = page => <AppLayout children={page} /> 
+// Remove the layout to hide navbar
+Detail.layout = page => page 

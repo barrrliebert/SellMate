@@ -20,42 +20,43 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
   return (
     <>
       <Head title="Welcome" />
-      <div className="bg-gray-50 text-black dark:bg-black dark:text-white min-h-screen flex flex-col">
-        <div className="relative h-[50vh] md:h-[60vh] mb-14">
-          <img
-            src={sliderImages[currentIndex]}
-            alt="Banner"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            {sliderImages.map((_, index) => (
-              <span
-                key={index}
-                className={`h-2 w-2 rounded-full ${index === currentIndex ? 'bg-white' : 'bg-gray-400'}`}
-              ></span>
-            ))}
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Main Image and Text Section */}
+        <div className="flex-1 flex flex-col px-6 pt-10">
+          {/* Illustration */}
+          <div className="w-full max-w-md mx-auto mb-8">
+            <img
+              src="/images/ilustrator-onboarding.png"
+              className="w-full h-auto"
+            />
           </div>
-        </div>
-        <div className="max-w-lg px-6 lg:mx-auto">
-          <p className="text-left text-3xl lg:text-center mb-6">
-            <span>Catat pemasukan TEFA</span>
-            <br />
-            <span>kamu bersama SellMate</span>
-          </p>
-        </div>
-        <div className="flex justify-center space-x-4 mt-6">
-          <Link
-            href={route('login')}
-            className="rounded-sm px-8 py-2 border border-violet-300 bg-white text-violet-600 hover:bg-violet-50 transition"
-          >
-            Log in
-          </Link>
-          <Link
-            href={route('register')}
-            className="rounded-sm px-8 py-2 bg-gray-500 text-white hover:bg-gray-600 transition"
-          >
-            Register
-          </Link>
+
+          {/* Text Content */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-black leading-tight">
+              Kelola omzet Tefamu dengan
+              <br />
+              satu genggaman bersama
+              <br />
+              SellMate
+            </h1>
+          </div>
+
+          {/* Buttons */}
+          <div className="w-full flex flex-col items-center space-y-3">
+            <Link
+              href={route('register')}
+              className="w-[300px] h-[40px] bg-[#DD661D] text-white text-center py-2 rounded font-medium hover:bg-[#BB551A] transition"
+            >
+              Mulai
+            </Link>
+            <Link
+              href={route('login')}
+              className="w-[300px] h-[40px] border border-[#DD661D] text-center py-2 rounded text-gray-600 font-medium hover:bg-[#BB551A] transition"
+            >
+              Login
+            </Link>
+          </div>
         </div>
       </div>
     </>

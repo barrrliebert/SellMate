@@ -45,4 +45,20 @@ class UserDashboardController extends Controller
             'type' => 'topOmzet'
         ]);
     }
+
+    /**
+     * Display target page
+     */
+    public function target()
+    {
+        return inertia('Apps/UserDashboard/Target/Index');
+    }
+
+    /**
+     * Display target edit page
+     */
+    public function editTarget()
+    {
+        return inertia('Apps/UserDashboard/Target/Edit');
+    }
 } 
