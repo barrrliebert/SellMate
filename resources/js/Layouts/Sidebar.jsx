@@ -19,7 +19,7 @@ export default function Sidebar({ sidebarOpen }) {
             {sidebarOpen ?
                 <>
                     <div className="flex justify-center items-center px-6 py-2 h-16">
-                        <div className="text-2xl font-bold text-center leading-loose tracking-wider text-gray-900 dark:text-gray-200">
+                        <div className="text-lg font-bold text-center leading-loose tracking-wider text-gray-900 dark:text-gray-200">
                             SellMate
                         </div>
                     </div>

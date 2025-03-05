@@ -36,5 +36,17 @@ class PermissionTableSeeder extends Seeder
          Permission::create(['name' => 'permissions-create']);
          Permission::create(['name' => 'permissions-update']);
          Permission::create(['name' => 'permissions-delete']);
+
+         // products permissions
+         Permission::create(['name' => 'products-access']);
+         Permission::create(['name' => 'products-data']);
+         Permission::create(['name' => 'products-create']);
+         Permission::create(['name' => 'products-update']);
+         Permission::create(['name' => 'products-delete']);
+
+         // omzet permissions
+         Permission::create(['name' => 'omzet-access']);
+         Permission::create(['name' => 'omzet-create']);
+         Permission::create(['name' => 'omzet-data']);
     }
 }

@@ -91,16 +91,16 @@ export default function AuthDropdown({auth, isMobile, toggleSidebar}) {
             ) : (
                 <div ref={dropdownRef} className="flex items-center gap-4">
                     <Menu className='relative z-10' as="div">
-                        <Menu.Button className="flex items-center group bg-slate-200 rounded-full py-2 px-5">
-                            <div className="flex flex-col text-left mr-4">
-                                <span className="text-md">{auth.user.name}</span>
+                        <Menu.Button className="flex items-center group bg-gray-200 rounded-full py-1 px-2">
+                            <div className="flex flex-col text-left mr-4 ml-2">
+                                <span className="text-xs">{auth.user.name}</span>
                                 <span className="text-xs">{auth.user.email}</span>
                             </div>
                             <div className="bg-white rounded-full">
                                 <img
                                     src={auth.user.avatar}
                                     alt={auth.user.name}
-                                    className="w-8 h-8 rounded-full"
+                                    className="w-7 h-7 rounded-full"
                                 />
                             </div>
                         </Menu.Button>
@@ -130,9 +130,52 @@ export default function AuthDropdown({auth, isMobile, toggleSidebar}) {
                         </Transition>
                     </Menu>
 
-                    <button className='absolute left-5 text-gray-700 dark:text-gray-400 bg-slate-200 dark:bg-slate-700 rounded-full p-2' onClick={toggleSidebar}>
-                        <IconAlignLeft size={28} strokeWidth={1.5}/>
+                    <button className='absolute left-5 text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-slate-700 rounded-full p-2' onClick={() => setIsToggle(!isToggle)}
+                    >
+                        <IconAlignLeft size={18} strokeWidth={1.5}/>
                     </button>
+                    <div className={`${isToggle ?'translate-x-0 opacity-100' : '-translate-x-full'} fixed top-0 left-0 z-50 w-[165px] h-full transition-all duration-300 transform border-r bg-white dark:bg-gray-950 dark:border-gray-900`}>
+                        <div className="flex justify-center items-center px-6 py-2 h-16">
+                            <div className="text-lg font-bold text-center leading-loose tracking-wider text-gray-900 dark:text-gray-200 mr-2">
+                                SellMate
+                            </div>
+                            <button className='flex text-gray-700 dark:text-gray-400' onClick={() => setIsToggle(!isToggle)}
+                            >
+                                <IconAlignLeft size={18} strokeWidth={1.5}/>
+                            </button>
+                        </div>
+                        <div className="w-full flex flex-col overflow-y-auto">
+                            {menuNavigation.map((item, index) => (
+                                <div key={index}>
+                                    <div className="text-gray-500 text-xs py-3 px-4 font-bold uppercase">
+                                        {item.title}
+                                    </div>
+                                    {item.details.map((detail, indexDetail) => (
+                                        detail.hasOwnProperty('subdetails') ?
+                                        <LinkItemDropdown
+                                            key={indexDetail}
+                                            title={detail.title}
+                                            icon={detail.icon}
+                                            data={detail.subdetails}
+                                            access={detail.permissions}
+                                            sidebarOpen={true}
+                                            onClick={() => setIsToggle(!isToggle)}
+                                        />
+                                        :
+                                        <LinkItem
+                                            key={indexDetail}
+                                            title={detail.title}
+                                            icon={detail.icon}
+                                            href={detail.href}
+                                            access={detail.permissions}
+                                            sidebarOpen={true}
+                                            onClick={() => setIsToggle(!isToggle)}
+                                        />
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
 
