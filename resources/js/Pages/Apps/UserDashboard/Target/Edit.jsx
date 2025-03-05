@@ -200,6 +200,10 @@ export default function Edit() {
                                             style={{ width: `${calculateProgress()}%` }}
                                         />
                                     </div>
+                                    <div 
+                                        className="absolute top-1/2 -translate-y-1/2 w-3 h-8 bg-purple-600 dark:bg-purple-400 rounded-full transition-all duration-150 -translate-x-1/2 cursor-pointer"
+                                        style={{ left: `${calculateProgress()}%` }}
+                                    />
                                     <input
                                         type="range"
                                         min={data.min_target}
