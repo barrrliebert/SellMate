@@ -140,8 +140,10 @@ class ProductController extends Controller implements HasMiddleware
         // get product
         $product = Product::findOrFail($id);
 
-        // delete image
-        Storage::delete('public/products/'.$product->foto_produk);
+        // delete image if exists
+        if ($product->foto_produk) {
+            Storage::delete('public/products/'.$product->getRawOriginal('foto_produk'));
+        }
 
         // delete product
         $product->delete();

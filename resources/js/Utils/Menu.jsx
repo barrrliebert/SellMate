@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { IconCirclePlus, IconLayout2, IconTable, IconUserBolt, IconUserShield, IconUsers, IconBox, IconPackage, IconSquareRoundedPlusFilled } from '@tabler/icons-react';
+import { IconCirclePlus, IconLayout2, IconTable, IconUserBolt, IconUserShield, IconUsers, IconBox, IconPackage, IconSquareRoundedPlusFilled, IconTarget } from '@tabler/icons-react';
 import hasAnyPermission from './Permissions';
 import React from 'react'
 
@@ -38,6 +38,13 @@ export default function Menu() {
                     href: '/apps/user-dashboard/omzet',
                     active: url === '/apps/user-dashboard/omzet',
                     icon: <IconSquareRoundedPlusFilled size={20} strokeWidth={1.5}/>,
+                    permissions: true,
+                },
+                {
+                    title: 'Target',
+                    href: '/apps/user-dashboard/target',
+                    active: url.startsWith('/apps/user-dashboard/target'),
+                    icon: <IconTarget size={20} strokeWidth={1.5}/>,
                     permissions: true,
                 }
             ]

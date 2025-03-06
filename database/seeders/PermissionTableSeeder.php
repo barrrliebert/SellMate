@@ -48,5 +48,12 @@ class PermissionTableSeeder extends Seeder
          Permission::create(['name' => 'omzet-access']);
          Permission::create(['name' => 'omzet-create']);
          Permission::create(['name' => 'omzet-data']);
+
+         // target permissions
+         Permission::create(['name' => 'target-access']);
+         Permission::create(['name' => 'target-create']);
+         Permission::create(['name' => 'target-update']);
+         Permission::create(['name' => 'target-delete']);
+         Permission::create(['name' => 'target-data']);
     }
 }

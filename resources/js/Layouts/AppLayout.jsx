@@ -34,7 +34,7 @@ export default function AppLayout({ user, header, children }) {
                 <Sidebar sidebarOpen={sidebarOpen}/>
                 <div className='flex-1 flex-col overflow-y-auto h-screen'>
                     <Navbar toggleSidebar={toggleSidebar} themeSwitcher={themeSwitcher} darkMode={darkMode} />
-                    <div className='w-full py-8 px-4 md:px-6 min-h-screen overflow-y-auto md:mb-0 text-white bg-white lg:bg-transparent dark:bg-gray-950 dark:text-gray-100'>
+                    <div className='w-full md:py-8 md:px-6 min-h-screen overflow-y-auto md:mb-0 text-white bg-white lg:bg-transparent dark:bg-gray-950 dark:text-gray-100'>
                         <Toaster position='top-right'/>
                         {children}
                     </div>
