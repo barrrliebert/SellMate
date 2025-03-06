@@ -24,7 +24,11 @@
         "caniuse-lite": "^1.0.30001701",
         "chart.js": "^4.4.2",
         "clsx": "^2.1.1",
+        "html2canvas": "^1.4.1",
+        "jspdf": "^3.0.0",
+        "jspdf-autotable": "^5.0.2",
         "react-chartjs-2": "^5.2.0",
+        "react-datepicker": "^8.1.0",
         "react-hot-toast": "^2.4.1",
         "sweetalert2": "^11.10.7"
     }
