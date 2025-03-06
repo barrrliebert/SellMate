@@ -41,9 +41,13 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
     // users route
     Route::resource('/users', UserController::class)->except('show');
 
+
+
     // video route  
     Route::resource('/videos', VideoController::class);
     Route::resource('/article', ArticleController::class);
 });
+
+Route::get('/apps/laporan/omzet', [\App\Http\Controllers\LaporanController::class, 'exportOmzet'])->name('laporan.omzet');
 
 require __DIR__.'/auth.php';

@@ -15,6 +15,8 @@ class VideoController extends Controller
         $this->repository = $repository;
     }
 
+
+
     public function index()
     {
         $videos = $this->repository->getAll();

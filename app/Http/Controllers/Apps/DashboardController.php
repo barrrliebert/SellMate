@@ -19,6 +19,8 @@ class DashboardController extends Controller implements HasMiddleware
         ];
     }
 
+    
+
     /**
      * Handle the incoming request.
      */
