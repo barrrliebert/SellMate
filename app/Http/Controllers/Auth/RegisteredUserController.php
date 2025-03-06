@@ -34,9 +34,33 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'school' => 'required|string|max:255',
             'major' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'min:8', Rules\Password::defaults()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised(),
+            ],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi',
+            'name.max' => 'Nama lengkap maksimal 255 karakter',
+            'school.required' => 'Nama sekolah wajib diisi',
+            'school.max' => 'Nama sekolah maksimal 255 karakter',
+            'major.required' => 'Jurusan wajib diisi',
+            'major.max' => 'Jurusan maksimal 255 karakter',
+            'username.required' => 'Username wajib diisi',
+            'username.unique' => 'Username sudah digunakan',
+            'username.max' => 'Username maksimal 255 karakter',
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'password.required' => 'Password wajib diisi',
+            'password.min' => 'Password minimal 8 karakter',
+            'password.mixed' => 'Password harus mengandung huruf besar dan kecil',
+            'password.numbers' => 'Password harus mengandung angka',
+            'password.symbols' => 'Password harus mengandung simbol',
+            'password.uncompromised' => 'Password yang Anda masukkan terlalu umum. Mohon gunakan password yang lebih unik',
         ]);
 
         $user = User::create([

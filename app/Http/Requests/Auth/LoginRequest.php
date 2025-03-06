@@ -32,6 +32,15 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'password.required' => 'Password wajib diisi',
+        ];
+    }
+
     /**
      * Attempt to authenticate the request's credentials.
      *
@@ -41,11 +50,21 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Check if email exists
+        $user = \App\Models\User::where('email', $this->email)->first();
+        
+        if (!$user) {
             RateLimiter::hit($this->throttleKey());
-
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Email tidak terdaftar.',
+            ]);
+        }
+
+        // Check password
+        if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'password' => 'Password salah.',
             ]);
         }
 
