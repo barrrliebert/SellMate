@@ -68,8 +68,9 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
 
 
     // video route  
-    Route::resource('/videos', VideoController::class);
-    Route::resource('/article', ArticleController::class);
+    Route::resource('/videos', VideoController::class)->except('show');
+    // articles route
+    Route::resource('/articles', ArticleController::class)->except('show');
     // products route
     Route::resource('/products', ProductController::class)->except('show');
 });

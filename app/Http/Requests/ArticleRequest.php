@@ -23,6 +23,7 @@ class ArticleRequest extends FormRequest
     {
         return [
             'file_article' => 'nullable|file|mimes:pdf,doc,docx|max:2048', // Maximum 2MB
+            'thumbnail' => 'nullable|file|image|mimes:jpeg,png,jpg|max:2048', // Maximum 2MB
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'author' => 'required|string|max:255',

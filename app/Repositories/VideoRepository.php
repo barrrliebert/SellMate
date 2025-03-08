@@ -35,7 +35,10 @@ class VideoRepository
     {
         $video = $this->findById($id);
         if (isset($data['video_file'])) {
-            Storage::disk('public')->delete($video->file_video);
+            if ($video->file_video) {
+                // Pastikan file path tidak null atau kosong sebelum dihapus
+                Storage::disk('public')->delete($video->file_video);
+            }
             $data['video_file'] = $data['video_file']->store('videos', 'public');
         }
         $video->update($data);

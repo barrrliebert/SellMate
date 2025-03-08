@@ -30,6 +30,10 @@ class ArticleRepository
             $data['file_article'] = $this->storeFile($data['file_article']);
         }
 
+        if (isset($data['thumbnail'])) {
+            $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
+        }
+
         return $this->model->create($data);
     }
 
@@ -38,11 +42,17 @@ class ArticleRepository
         $article = $this->findById($id);
 
         if (isset($data['file_article'])) {
-            // delete old file
             if ($article->file_article) {
                 Storage::delete($article->file_article);
             }
             $data['file_article'] = $this->storeFile($data['file_article']);
+        }
+
+        if (isset($data['thumbnail'])) {
+            if ($article->thumbnail) {
+                Storage::delete($article->thumbnail);
+            }
+            $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
         }
 
         $article->update($data);
@@ -53,9 +63,12 @@ class ArticleRepository
     {
         $article = $this->findById($id);
 
-        //  delete file if exists
         if ($article->file_article) {
             Storage::delete($article->file_article);
+        }
+
+        if ($article->thumbnail) {
+            Storage::delete($article->thumbnail);
         }
 
         return $article->delete();
@@ -63,6 +76,11 @@ class ArticleRepository
 
     private function storeFile($file)
     {
-        return $file->store('articles', 'public'); // Simpan di storage/app/public/articles
+        return $file->store('articles', 'public');
+    }
+
+    private function storeThumbnail($file)
+    {
+        return $file->store('thumbnails', 'public');
     }
 }

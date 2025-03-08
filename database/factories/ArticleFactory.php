@@ -19,6 +19,7 @@ class ArticleFactory extends Factory
     {
         return [
             'file_article' => 'articles/' . $this->faker->word() . '.pdf', // Simulasi path file
+            'thumbnail' => 'thumbnails/' . $this->faker->word() . '.jpg', // Simulasi path thumbnail
             'title' => $this->faker->sentence(),
             'description' => $this->faker->paragraph(),
             'author' => $this->faker->name(),

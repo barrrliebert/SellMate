@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Apps;
 
 use App\Http\Requests\VideoRequest;
 use App\Repositories\VideoRepository;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Routing\Controllers\Middleware;
+use Inertia\Inertia;
 
 class VideoController extends Controller
 {
@@ -15,17 +18,27 @@ class VideoController extends Controller
         $this->repository = $repository;
     }
 
-
+    public function middleware($middleware, array $options = [])
+    {
+        return [
+            new Middleware('permission:videos-data', only: ['index']),
+            new Middleware('permission:videos-create', only: ['create', 'store']),
+            new Middleware('permission:videos-update', only: ['edit', 'update']),
+            new Middleware('permission:videos-delete', only: ['destroy']),
+        ];
+    }
 
     public function index()
     {
         $videos = $this->repository->getAll();
-        return view('apps.videos.index', compact('videos'));
+        return Inertia::render('Apps/Videos/Index', [
+            'videos' => $videos
+        ]);
     }
 
     public function create()
     {
-        return view('apps.videos.create');
+        return Inertia::render('Apps/Videos/Create');
     }
 
     public function store(VideoRequest $request)
@@ -37,7 +50,9 @@ class VideoController extends Controller
     public function edit($id)
     {
         $video = $this->repository->findById($id);
-        return view('apps.videos.edit', compact('video'));
+        return Inertia::render('Apps/Videos/Edit', [
+            'video' => $video
+        ]);
     }
 
     public function update(VideoRequest $request, $id)
