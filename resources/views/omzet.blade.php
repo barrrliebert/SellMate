@@ -1,4 +1,3 @@
-<!-- filepath: /c:/xampp/htdocs/SellMate/resources/views/omzet.blade.php -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,9 +11,6 @@
 </head>
 <body>
     <h2>Laporan Omzet</h2>
-    <p>
-        Periode: {{ $startDate->format('d F Y') }} s/d {{ $endDate->format('d F Y') }}
-    </p>
     <table>
         <thead>
             <tr>
@@ -23,6 +19,7 @@
                 <th>Jurusan</th>
                 <th>Total Omzet</th>
                 <th>Nilai</th>
+                <th>Tanggal Omzet</th>
             </tr>
         </thead>
         <tbody>
@@ -46,6 +43,7 @@
                 <td>{{ $item->user->major ?? 'Belum diisi' }}</td>
                 <td>{{ $item->formatted_omzet }}</td>
                 <td>{{ $grade }}</td>
+                <td>{{ $item->tanggal->format('d-m-Y') }}</td>
             </tr>
             @endforeach
         </tbody>

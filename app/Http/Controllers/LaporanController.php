@@ -11,6 +11,7 @@ class LaporanController extends Controller
 {
     public function exportOmzet(Request $request)
     {
+
         // Jika ada query parameter start_date dan end_date, gunakan untuk filter
     $startDate = $request->query('start_date') 
     ? \Carbon\Carbon::parse($request->query('start_date'))->startOfDay()
@@ -22,6 +23,8 @@ $endDate   = $request->query('end_date')
 $omzetList = \App\Models\Omzet::with('user')
     ->whereBetween('tanggal', [$startDate, $endDate])
     ->get();
+
+    $tanggal = Carbon::now()->format('d-m-Y');
 
 $pdf = Pdf::loadView('omzet', compact('omzetList', 'startDate', 'endDate'));
 return $pdf->download('laporan_omzet.pdf');
