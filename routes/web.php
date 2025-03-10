@@ -49,6 +49,10 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
     Route::get('/omzets/user-total', [OmzetController::class, 'getUserTotalOmzet'])->middleware('permission:omzet-data')->name('omzets.user-total');
     Route::get('/omzets/user-commission', [OmzetController::class, 'getUserTotalCommission'])->middleware('permission:omzet-data')->name('omzets.user-commission');
     Route::get('/omzets/user-weekly-average', [OmzetController::class, 'getUserWeeklyAverageOmzet'])->middleware('permission:omzet-data')->name('omzets.user-weekly-average');
+    Route::get('/omzets/total', [OmzetController::class, 'getTotalOmzet'])->name('omzets.total');
+    Route::get('/products/total', [OmzetController::class, 'getTotalProducts'])->name('products.total');
+    Route::get('/users/total', [OmzetController::class, 'getTotalUsers'])->name('users.total');
+    Route::get('/omzets/export-pdf', [OmzetController::class, 'exportPdf'])->middleware('permission:omzet-data')->name('omzets.export');
     
     // target routes
     Route::post('/targets', [TargetController::class, 'store'])->middleware('permission:target-create')->name('targets.store');
