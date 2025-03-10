@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\OmzetRequest;
 use Inertia\Inertia;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\PDF;
 
 class OmzetController extends Controller
 {
@@ -54,14 +56,81 @@ class OmzetController extends Controller
     }
 
     /**
-     * Get user's transaction records
+     * Get transaction records for all users (admin) or specific user
      */
-    public function getTransactionRecords()
+    public function getTransactionRecords(Request $request)
     {
-        $omzets = Omzet::with('product')
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->get();
+        // Check if user is admin
+        $isAdmin = auth()->user()->hasRole('super-admin');
+
+        $query = Omzet::with(['user', 'product'])
+            ->latest();
+
+        // If not admin, only get user's transactions
+        if (!$isAdmin) {
+            $query->where('user_id', Auth::id());
+        }
+
+        // Add search functionality
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Add date filtering
+        if ($request->has('filter_type')) {
+            $filterType = $request->filter_type;
+            $now = now();
+
+            switch ($filterType) {
+                case 'today':
+                    $query->whereDate('tanggal', $now);
+                    break;
+                case 'week':
+                    $startOfWeek = $now->copy()->startOfWeek(Carbon::MONDAY);
+                    $endOfWeek = $now->copy()->endOfWeek(Carbon::SUNDAY);
+                    $query->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
+                    break;
+                case 'month':
+                    $query->whereMonth('tanggal', $now->month)
+                         ->whereYear('tanggal', $now->year);
+                    break;
+                case 'custom':
+                    if ($request->has('start_date') && $request->has('end_date')) {
+                        $query->whereBetween('tanggal', [
+                            Carbon::parse($request->start_date)->startOfDay(),
+                            Carbon::parse($request->end_date)->endOfDay()
+                        ]);
+                    }
+                    break;
+            }
+        }
+
+        $omzets = $query->get()
+            ->map(function($omzet) use ($isAdmin) {
+                $data = [
+                    'id' => $omzet->id,
+                    'tanggal' => $omzet->tanggal,
+                    'formatted_omzet' => $omzet->formatted_omzet,
+                    'total_omzet' => $omzet->total_omzet
+                ];
+
+                if (!$isAdmin) {
+                    $data['product'] = [
+                        'nama_produk' => $omzet->product->nama_produk,
+                        'foto_produk' => $omzet->product->foto_produk
+                    ];
+                } else {
+                    $data['user'] = [
+                        'name' => $omzet->user->name,
+                        'major' => $omzet->user->major
+                    ];
+                }
+
+                return $data;
+            });
 
         return response()->json([
             'omzets' => $omzets
@@ -95,11 +164,51 @@ class OmzetController extends Controller
     /**
      * Get total omzet for all users this month
      */
-    public function getTopOmzet()
+    public function getTopOmzet(Request $request)
     {
-        $topUsers = Omzet::with(['user', 'product'])
-            ->whereMonth('tanggal', now()->month)
-            ->get()
+        $query = Omzet::with(['user', 'product']);
+
+        // Add search functionality
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Add date filtering
+        if ($request->has('filter_type')) {
+            $filterType = $request->filter_type;
+            $now = now();
+
+            switch ($filterType) {
+                case 'today':
+                    $query->whereDate('tanggal', $now);
+                    break;
+                case 'week':
+                    $startOfWeek = $now->copy()->startOfWeek(Carbon::MONDAY);
+                    $endOfWeek = $now->copy()->endOfWeek(Carbon::SUNDAY);
+                    $query->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
+                    break;
+                case 'month':
+                    $query->whereMonth('tanggal', $now->month)
+                         ->whereYear('tanggal', $now->year);
+                    break;
+                case 'custom':
+                    if ($request->has('start_date') && $request->has('end_date')) {
+                        $query->whereBetween('tanggal', [
+                            Carbon::parse($request->start_date)->startOfDay(),
+                            Carbon::parse($request->end_date)->endOfDay()
+                        ]);
+                    }
+                    break;
+                default:
+                    $query->whereMonth('tanggal', $now->month)
+                         ->whereYear('tanggal', $now->year);
+            }
+        }
+
+        $topUsers = $query->get()
             ->groupBy('user_id')
             ->map(function ($omzets) {
                 $totalOmzet = $omzets->sum('total_omzet');
@@ -178,5 +287,138 @@ class OmzetController extends Controller
         return response()->json([
             'total_komisi' => 'Rp ' . number_format($totalKomisi, 0, ',', '.')
         ]);
+    }
+
+    /**
+     * Get total omzet from all users
+     */
+    public function getTotalOmzet()
+    {
+        $totalOmzet = Omzet::with('product')
+            ->get()
+            ->sum('total_omzet');
+
+        return response()->json([
+            'total_omzet' => 'Rp ' . number_format($totalOmzet, 0, ',', '.')
+        ]);
+    }
+
+    /**
+     * Get total products
+     */
+    public function getTotalProducts()
+    {
+        $totalProducts = \App\Models\Product::count();
+
+        return response()->json([
+            'total' => $totalProducts
+        ]);
+    }
+
+    /**
+     * Get total users
+     */
+    public function getTotalUsers()
+    {
+        $totalUsers = \App\Models\User::whereHas('roles', function($query) {
+            $query->where('name', 'users-access');
+        })->count();
+
+        return response()->json([
+            'total' => $totalUsers
+        ]);
+    }
+
+    /**
+     * Export transactions to PDF based on filter
+     */
+    public function exportPdf(Request $request)
+    {
+        $filter = $request->query('filter', 'today');
+        $currentTime = now();
+        
+        $query = Omzet::with(['user', 'product']);
+
+        // Apply date filter
+        switch ($filter) {
+            case 'today':
+                $query->whereDate('tanggal', $currentTime);
+                break;
+            case 'week':
+                $startOfWeek = $currentTime->copy()->startOfWeek(Carbon::MONDAY);
+                $endOfWeek = $currentTime->copy()->endOfWeek(Carbon::SUNDAY);
+                $query->whereBetween('tanggal', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')]);
+                break;
+            case '3months':
+                $query->whereBetween('tanggal', [
+                    $currentTime->copy()->subMonths(3)->format('Y-m-d'), 
+                    $currentTime->format('Y-m-d')
+                ]);
+                break;
+            case '6months':
+                $query->whereBetween('tanggal', [
+                    $currentTime->copy()->subMonths(6)->format('Y-m-d'), 
+                    $currentTime->format('Y-m-d')
+                ]);
+                break;
+            case '12months':
+                $query->whereBetween('tanggal', [
+                    $currentTime->copy()->subMonths(12)->format('Y-m-d'), 
+                    $currentTime->format('Y-m-d')
+                ]);
+                break;
+            case 'custom':
+                if ($request->has('start_date') && $request->has('end_date')) {
+                    $query->whereBetween('tanggal', [
+                        Carbon::parse($request->start_date)->startOfDay(),
+                        Carbon::parse($request->end_date)->endOfDay()
+                    ]);
+                }
+                break;
+            default:
+                $query->whereDate('tanggal', $currentTime);
+        }
+
+        $transactions = $query->latest()->get();
+
+        // Generate PDF using DomPDF
+        $pdf = \PDF::loadView('pdf.transactions', [
+            'transactions' => $transactions,
+            'filter' => $filter,
+            'dateRange' => $this->getDateRangeText($filter, $currentTime, $request),
+            'exportTime' => $currentTime
+        ]);
+
+        return $pdf->download('transactions.pdf');
+    }
+
+    /**
+     * Get date range text for PDF header
+     */
+    private function getDateRangeText($filter, $currentTime, $request = null)
+    {
+        switch ($filter) {
+            case 'today':
+                return 'Hari ini (' . $currentTime->format('d/m/Y') . ')';
+            case 'week':
+                $startOfWeek = $currentTime->copy()->startOfWeek(Carbon::MONDAY);
+                $endOfWeek = $currentTime->copy()->endOfWeek(Carbon::SUNDAY);
+                return 'Minggu ini (' . $startOfWeek->format('d/m/Y') . ' - ' . $endOfWeek->format('d/m/Y') . ')';
+            case '3months':
+                return '3 Bulan terakhir (' . $currentTime->copy()->subMonths(3)->format('d/m/Y') . ' - ' . $currentTime->format('d/m/Y') . ')';
+            case '6months':
+                return '6 Bulan terakhir (' . $currentTime->copy()->subMonths(6)->format('d/m/Y') . ' - ' . $currentTime->format('d/m/Y') . ')';
+            case '12months':
+                return '12 Bulan terakhir (' . $currentTime->copy()->subMonths(12)->format('d/m/Y') . ' - ' . $currentTime->format('d/m/Y') . ')';
+            case 'custom':
+                if ($request && $request->has('start_date') && $request->has('end_date')) {
+                    $startDate = Carbon::parse($request->start_date)->format('d/m/Y');
+                    $endDate = Carbon::parse($request->end_date)->format('d/m/Y');
+                    return 'Periode (' . $startDate . ' - ' . $endDate . ')';
+                }
+                return 'Custom periode';
+            default:
+                return 'Semua waktu';
+        }
     }
 } 
