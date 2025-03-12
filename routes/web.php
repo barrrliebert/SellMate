@@ -3,9 +3,11 @@
 use App\Http\Controllers\Apps\DashboardController;
 use App\Http\Controllers\Apps\PermissionController;
 use App\Http\Controllers\Apps\ProductController;
+use App\Http\Controllers\Apps\VideoController;
 use App\Http\Controllers\Apps\RoleController;
 use App\Http\Controllers\Apps\UserController;
 use App\Http\Controllers\Apps\UserDashboardController;
+use App\Http\Controllers\Apps\ArticleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Apps\OmzetController;
 use App\Http\Controllers\Apps\TargetController;
@@ -68,6 +70,10 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
     Route::resource('/users', UserController::class)->except('show');
     // products route
     Route::resource('/products', ProductController::class)->except('show');
+    // videos route
+    Route::resource('/videos', VideoController::class)->except('show');
+    // articles route
+    Route::resource('/articles', ArticleController::class)->except('show');
 });
 
 require __DIR__.'/auth.php';

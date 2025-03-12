@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { IconCirclePlus, IconLayout2, IconTable, IconUserBolt, IconUserShield, IconUsers, IconBox, IconPackage, IconSquareRoundedPlusFilled, IconTarget } from '@tabler/icons-react';
+import { IconCirclePlus, IconLayout2, IconTable, IconUserBolt, IconUserShield, IconUsers, IconBox, IconPackage, IconSquareRoundedPlusFilled, IconTarget, IconVideo, IconArticle } from '@tabler/icons-react';
 import hasAnyPermission from './Permissions';
 import React from 'react'
 
@@ -113,6 +113,58 @@ export default function Menu() {
                             icon: <IconCirclePlus size={20} strokeWidth={1.5}/>,
                             active: url === '/apps/products/create' ? true : false,
                             permissions: hasAnyPermission(['products-create']),
+                        },
+                    ]
+                }
+            ]
+        }, {
+            title: 'Video Management',
+            permissions: hasAnyPermission(['videos-access']),
+            details: [
+                {
+                    title: 'Video',
+                    icon: <IconVideo size={20} strokeWidth={1.5}/>,
+                    permissions: hasAnyPermission(['videos-access']),
+                    subdetails: [
+                        {
+                            title: 'Data Video',
+                            href: '/apps/videos',
+                            icon: <IconVideo size={20} strokeWidth={1.5}/>,
+                            active: url === '/apps/videos' ? true : false,
+                            permissions: hasAnyPermission(['videos-data']),
+                        },
+                        {
+                            title: 'Tambah Video',
+                            href: '/apps/videos/create',
+                            icon: <IconCirclePlus size={20} strokeWidth={1.5}/>,
+                            active: url === '/apps/videos/create' ? true : false,
+                            permissions: hasAnyPermission(['videos-create']),
+                        },
+                    ]
+                }
+            ]
+        }, {
+            title: 'Article Management',
+            permissions: hasAnyPermission(['articles-access']),
+            details: [
+                {
+                    title: 'Article',
+                    icon: <IconArticle size={20} strokeWidth={1.5}/>,
+                    permissions: hasAnyPermission(['articles-access']),
+                    subdetails: [
+                        {
+                            title: 'Data Article',
+                            href: '/apps/articles',
+                            icon: <IconArticle size={20} strokeWidth={1.5}/>,
+                            active: url === '/apps/articles' ? true : false,
+                            permissions: hasAnyPermission(['articles-data']),
+                        },
+                        {
+                            title: 'Tambah Article',
+                            href: '/apps/articles/create',
+                            icon: <IconCirclePlus size={20} strokeWidth={1.5}/>,
+                            active: url === '/apps/articles/create' ? true : false,
+                            permissions: hasAnyPermission(['articles-create']),
                         },
                     ]
                 }
