@@ -9,3 +9,4 @@
 composer require barryvdh/laravel-dompdf
 php artisan vendor:publish --provider="Barryvdh\DomPDF\ServiceProvider"
 php artisan storage:link
+9.  npm install react-quill
