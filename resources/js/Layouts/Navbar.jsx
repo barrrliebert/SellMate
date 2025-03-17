@@ -6,38 +6,44 @@ import Menu from '@/Utils/Menu';
 import Notification from '@/Components/Notification';
 
 export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
-    // destruct auth from props
+    // Destruct auth dari props
     const { auth } = usePage().props;
 
-    // get menu from utils
+    // Ambil menu dari utils
     const menuNavigation = Menu();
 
-    // recreate array from menu navigations
+    // Buat array baru dari menu navigasi
     const links = menuNavigation.flatMap((item) => item.details);
-    const filter_sublinks = links.filter((item) => item.hasOwnProperty('subdetails'));
-    const sublinks = filter_sublinks.flatMap((item) => item.subdetails);
+    const sublinks = links.flatMap((item) => item.subdetails || []);
 
-    // define state isMobile
+    // Cari hanya satu link aktif
+    const activeLink = links.find(link => link.active);
+    const activeSubLink = sublinks.find(sublink => sublink.active);
+
+    // Debugging: Cek menu yang aktif
+    console.log("Active Link:", activeLink);
+    console.log("Active SubLink:", activeSubLink);
+
+    // State untuk cek mode mobile
     const [isMobile, setIsMobile] = useState(false);
 
-    // define useEffect
     useEffect(() => {
-        // define handle resize window
+        // Fungsi untuk cek ukuran layar
         const handleResize = () => {
-          setIsMobile(window.innerWidth <= 768);
+            setIsMobile(window.innerWidth <= 768);
         };
 
-        // define event listener
+        // Tambahkan event listener
         window.addEventListener('resize', handleResize);
 
-        // call handle resize window
+        // Jalankan saat pertama kali
         handleResize();
 
-        // remove event listener
+        // Hapus event listener saat komponen di-unmount
         return () => {
-          window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', handleResize);
         };
-    })
+    }, []);
 
     return (
         <div className={`flex justify-between items-center min-w-full sticky top-0 z-20 h-16 md:border-b md:bg-white dark:md:border-gray-900 dark:md:bg-gray-950 ${auth.user.roles.some(role => role.name === 'users-access') ? 'bg-gradient-to-r from-[#EDA375] to-[#D4A8EF]' : 'bg-white dark:bg-gray-950'} md:bg-none px-4 md:px-6`}>
@@ -49,12 +55,11 @@ export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
                 )}
                 {!isMobile && (
                     <div className='flex flex-row items-center gap-1 md:border-l-2 md:border-double md:px-4 dark:border-gray-900'>
-                        {links.map((link, i) => (
-                            link.hasOwnProperty('subdetails') ?
-                            sublinks.map((sublink, x) => sublink.active === true && <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400' key={x}>{sublink.title}</span>)
-                            :
-                            link.active === true && <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400 ' key={i}>{link.title}</span>
-                        ))}
+                        {activeSubLink ? (
+                            <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400'>{activeSubLink.title}</span>
+                        ) : activeLink ? (
+                            <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400'>{activeLink.title}</span>
+                        ) : null}
                     </div>
                 )}
             </div>

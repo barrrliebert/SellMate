@@ -31,7 +31,7 @@ class ArticleController extends Controller
         $articles = $this->repository->getAll();
 
         return inertia('Apps/Articles/Index', [
-            'articles' => $articles  // $articles harus punya property 'data'
+            'articles' => $articles  // Pastikan articles memiliki property 'data'
         ]);
     }
 
@@ -64,5 +64,19 @@ class ArticleController extends Controller
     {
         $this->repository->delete($id);
         return redirect()->route('apps.articles.index')->with('success', 'Article deleted successfully.');
+    }
+
+    // Menampilkan detail artikel
+    public function show($id)
+    {
+        $article = $this->repository->findById($id);
+
+        if (!$article) {
+            return redirect()->route('apps.articles.index')->with('error', 'Article not found.');
+        }
+
+        return inertia('Apps/Articles/Show', [
+            'article' => $article
+        ]);
     }
 }

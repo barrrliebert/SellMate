@@ -1,12 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AppLayout from "@/Layouts/AppLayout";
 import { Head, Link, router } from "@inertiajs/react";
-import { IconEdit, IconTrash, IconVideo, IconLink } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconVideo, IconLink, IconPlayerPlay } from "@tabler/icons-react";
 import hasAnyPermission from "@/Utils/Permissions";
 import Swal from "sweetalert2";
 
 export default function Index({ videos }) {
     const [playingVideoId, setPlayingVideoId] = useState(null);
+    const [thumbnails, setThumbnails] = useState({});
+    const videoRefs = useRef({});
+
+    // Mengambil frame pertama dari setiap video
+    useEffect(() => {
+        videos.forEach((video) => {
+            if (!video.video_file) return;
+
+            const videoElement = document.createElement("video");
+            videoElement.src = video.video_file.startsWith("http")
+                ? video.video_file
+                : `/storage/${video.video_file}`;
+            videoElement.crossOrigin = "anonymous";
+            videoElement.muted = true;
+
+            videoElement.addEventListener("loadeddata", () => {
+                videoElement.currentTime = 0.1;
+            });
+
+            videoElement.addEventListener("seeked", () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                const ctx = canvas.getContext("2d");
+
+                ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                setThumbnails((prev) => ({
+                    ...prev,
+                    [video.id]: canvas.toDataURL("image/png"),
+                }));
+            });
+        });
+    }, [videos]);
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -71,32 +104,38 @@ export default function Index({ videos }) {
                 {(Array.isArray(videos) ? videos : []).map((video) => (
                     <div key={video.id} className="relative border p-4 bg-white rounded-lg shadow-md">
                         <div
-                            className="mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px] cursor-pointer"
+                            className="relative mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px] cursor-pointer"
                             onClick={() => handleTogglePlay(video.id)}
                         >
-                            {video.video_file ? (
-                                playingVideoId === video.id ? (
-                                    <video
-                                        controls
-                                        autoPlay
-                                        muted
+                            {playingVideoId === video.id ? (
+                                <video
+                                    ref={(el) => (videoRefs.current[video.id] = el)}
+                                    controls
+                                    autoPlay
+                                    muted
+                                    className="w-full h-full object-cover"
+                                >
+                                    <source
+                                        src={video.video_file.startsWith("http")
+                                            ? video.video_file
+                                            : `/storage/${video.video_file}`}
+                                        type="video/mp4"
+                                    />
+                                    Browser tidak mendukung video.
+                                </video>
+                            ) : thumbnails[video.id] ? (
+                                <div className="relative w-full h-full">
+                                    {/* Thumbnail */}
+                                    <img
+                                        src={thumbnails[video.id]}
+                                        alt="Thumbnail"
                                         className="w-full h-full object-cover"
-                                    >
-                                        <source
-                                            src={ video.video_file.startsWith('http')
-                                                ? video.video_file
-                                                : `/storage/${video.video_file}`}
-                                            type="video/mp4"
-                                        />
-                                        Browser tidak mendukung video.
-                                    </video>
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center relative">
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <IconVideo size={48} className="text-gray-400" />
-                                        </div>
+                                    />
+                                    {/* Icon Play di tengah */}
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40">
+                                        <IconPlayerPlay size={60} className="text-white opacity-80" />
                                     </div>
-                                )
+                                </div>
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <IconVideo size={48} className="text-gray-400" />
