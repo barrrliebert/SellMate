@@ -38,15 +38,22 @@ class ArticleRepository
     {
         $article = $this->findById($id);
 
-        if (isset($data['thumbnail'])) {
-            if ($article->thumbnail) {
-                Storage::delete($article->thumbnail);
-            }
-            $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
+          if (isset($data['thumbnail']) && $data['thumbnail'] instanceof \Illuminate\Http\UploadedFile) {
+        // Hapus thumbnail lama jika ada
+        if ($article->thumbnail) {
+            Storage::disk('public')->delete($article->thumbnail);
         }
+        
+        // Simpan thumbnail baru
+        $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
+    } else {
+        // Hapus kunci thumbnail dari data update agar tidak mengubah nilai yang ada
+        unset($data['thumbnail']);
+    }
+    
+    $article->update($data);
+    return $article;
 
-        $article->update($data);
-        return $article;
     }
 
     public function delete($id)

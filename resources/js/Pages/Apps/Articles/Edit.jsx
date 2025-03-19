@@ -15,7 +15,7 @@ export default function Edit({ article }) {
         description: article.description,
         author: article.author,
         published_at: article.published_at ?? "",
-        thumbnail: null,
+        thumbnail: null
     });
 
     const [previewThumbnail, setPreviewThumbnail] = useState(
