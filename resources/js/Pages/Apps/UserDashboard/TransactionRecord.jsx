@@ -23,14 +23,14 @@ export default function TransactionRecord() {
     }, []);
 
     return (
-        <section className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+        <section className="bg-white dark:bg-gray-900 rounded-lg border-[0.5px] border-gray-400 shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg lg:text-xl font-bold text-gray-800 dark:text-gray-100">
+                <h2 className="text-xl lg:text-xl font-bold text-gray-800 dark:text-gray-100">
                     Record Transaksi
                 </h2>
                 <Link
                     href="/apps/user-dashboard/transactions"
-                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-sm text-gray-800 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100 underline"
                 >
                     Lihat semua
                 </Link>
@@ -43,13 +43,13 @@ export default function TransactionRecord() {
             ) : transactions.length > 0 ? (
                 <div className="space-y-2">
                     {transactions.map((transaction, index) => (
-                        <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm p-5 flex items-center hover:shadow-md transition-shadow">
+                        <div key={index} className="bg-white dark:bg-gray-800 rounded-md p-5 flex items-center hover:shadow-md transition-shadow">
                             <div className=" h-10 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden flex-shrink-0 mr-5">
                                 {transaction.product.foto_produk ? (
                                     <img 
                                         src={transaction.product.foto_produk} 
                                         alt={transaction.product.nama_produk}
-                                        className="w-full h-full object-cover"
+                                        className="w-[43px] h-[43px] object-cover"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">

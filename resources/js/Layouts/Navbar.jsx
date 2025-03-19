@@ -40,7 +40,7 @@ export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
     })
 
     return (
-        <div className={`flex justify-between items-center min-w-full sticky top-0 z-20 h-16 md:border-b md:bg-white dark:md:border-gray-900 dark:md:bg-gray-950 ${auth.user.roles.some(role => role.name === 'users-access') ? 'bg-gradient-to-r from-[#EDA375] to-[#D4A8EF]' : 'bg-white dark:bg-gray-950'} md:bg-none px-4 md:px-6`}>
+        <div className={`flex justify-between items-center min-w-full sticky top-0 z-20 h-16  md:bg-white  dark:md:bg-gray-950 ${auth.user.roles.some(role => role.name === 'users-access') ? 'bg-gradient-to-r from-[#EDA375] to-[#D4A8EF]' : 'bg-white dark:bg-gray-950'} md:bg-none px-4 md:px-6`}>
             <div className='flex items-center gap-4'>
                 {!isMobile && (
                     <button className='text-gray-700 dark:text-gray-400' onClick={toggleSidebar}>
@@ -48,7 +48,7 @@ export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
                     </button>
                 )}
                 {!isMobile && (
-                    <div className='flex flex-row items-center gap-1 md:border-l-2 md:border-double md:px-4 dark:border-gray-900'>
+                    <div className='flex flex-row items-center gap-1 md:px-4 dark:border-gray-900'>
                         {links.map((link, i) => (
                             link.hasOwnProperty('subdetails') ?
                             sublinks.map((sublink, x) => sublink.active === true && <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400' key={x}>{sublink.title}</span>)

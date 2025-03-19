@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { IconChevronLeft, IconSearch, IconVideo, IconPlayerPlay, IconEye, IconShare, IconUser } from '@tabler/icons-react';
+import { IconChevronLeft, IconSearch, IconVideo, IconPlayerPlay, IconEye, IconShare, IconUser, IconBrandFacebook, IconBrandTwitter, IconBrandWhatsapp, IconCopy, IconX } from '@tabler/icons-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function Index({ videos }) {
@@ -8,17 +8,102 @@ export default function Index({ videos }) {
     const [thumbnails, setThumbnails] = useState({});
     const [durations, setDurations] = useState({});
     const [loadingThumbnails, setLoadingThumbnails] = useState({});
+    const [shareMenuOpen, setShareMenuOpen] = useState(null);
+    const [availableApps, setAvailableApps] = useState({
+        facebook: true,
+        twitter: true,
+        whatsapp: true,
+        native: false
+    });
     const videoRefs = useRef({});
+    const shareMenuRef = useRef(null);
 
     const handleTogglePlay = (id) => {
         setPlayingVideoId((prev) => (prev === id ? null : id));
     };
 
     const handleShare = (videoId, videoSlug) => {
+        detectAvailableApps();
+        setShareMenuOpen(videoId);
+    };
+
+    const handleCopyLink = (videoId, videoSlug) => {
         const url = route('apps.user.video.show', videoSlug || videoId);
         navigator.clipboard.writeText(url);
         toast.success('Link video berhasil disalin!');
+        setShareMenuOpen(null);
     };
+
+    const shareToSocial = (platform, videoId, videoSlug) => {
+        const url = route('apps.user.video.show', videoSlug || videoId);
+        const videoTitle = videos.find(v => v.id === videoId)?.title || 'Video';
+        let shareUrl = '';
+
+        switch (platform) {
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(videoTitle)}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(videoTitle + ': ' + url)}`;
+                break;
+            default:
+                break;
+        }
+
+        // Check if native sharing is supported
+        if (navigator.share && platform === 'native') {
+            navigator.share({
+                title: videoTitle,
+                text: videos.find(v => v.id === videoId)?.description?.substring(0, 100) + '...',
+                url: url,
+            }).catch(err => {
+                console.error('Error sharing:', err);
+            });
+            setShareMenuOpen(null);
+        } else if (shareUrl) {
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+            setShareMenuOpen(null);
+        }
+    };
+
+    // Attempt to detect available apps
+    const detectAvailableApps = () => {
+        // Check if Web Share API is available (mobile devices)
+        const hasShareApi = !!navigator.share;
+
+        // Can attempt to detect Facebook app via user agent or other methods
+        const isFacebookAvailable = /FBAN|FBAV/.test(navigator.userAgent);
+        
+        // Check for Twitter app
+        const isTwitterAvailable = /Twitter/i.test(navigator.userAgent);
+        
+        // Check for WhatsApp
+        const isWhatsAppAvailable = /WhatsApp/i.test(navigator.userAgent);
+
+        setAvailableApps({
+            facebook: true, // Always keep fallback to browser
+            twitter: true,  // Always keep fallback to browser
+            whatsapp: true, // Always keep fallback to browser
+            native: hasShareApi
+        });
+    };
+
+    // Close share menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
+                setShareMenuOpen(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Format duration to mm:ss
     const formatDuration = (seconds) => {
@@ -182,16 +267,75 @@ export default function Index({ videos }) {
                                             <IconEye size={14} strokeWidth={1.5} className="mr-1" />
                                             <span>{formatViewCount(video.views || 0)}</span>
                                         </div>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleShare(video.id, video.slug);
-                                            }}
-                                            className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                                        >
-                                            <IconShare size={14} strokeWidth={1.5} className="mr-1" />
-                                            <span>Share</span>
-                                        </button>
+                                        <div className="relative">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleShare(video.id, video.slug);
+                                                }}
+                                                className="flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                                            >
+                                                <IconShare size={14} strokeWidth={1.5} className="mr-1" />
+                                                <span>Share</span>
+                                            </button>
+                                            
+                                            {/* Share Menu Popup */}
+                                            {shareMenuOpen === video.id && (
+                                                <div 
+                                                    ref={shareMenuRef}
+                                                    className="absolute right-0 bottom-8 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden z-10"
+                                                >
+                                                    <div className="flex justify-between items-center p-2 border-b dark:border-gray-700">
+                                                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Share to</span>
+                                                        <button 
+                                                            onClick={() => setShareMenuOpen(null)}
+                                                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                                        >
+                                                            <IconX size={16} />
+                                                        </button>
+                                                    </div>
+                                                    <div className="p-2">
+                                                        {availableApps.native && (
+                                                            <button 
+                                                                onClick={() => shareToSocial('native', video.id, video.slug)}
+                                                                className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-left"
+                                                            >
+                                                                <IconShare size={18} className="text-gray-600" />
+                                                                <span className="text-sm">Native Share</span>
+                                                            </button>
+                                                        )}
+                                                        <button 
+                                                            onClick={() => shareToSocial('facebook', video.id, video.slug)}
+                                                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-left"
+                                                        >
+                                                            <IconBrandFacebook size={18} className="text-blue-600" />
+                                                            <span className="text-sm">Facebook</span>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => shareToSocial('twitter', video.id, video.slug)}
+                                                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-left"
+                                                        >
+                                                            <IconBrandTwitter size={18} className="text-blue-400" />
+                                                            <span className="text-sm">Twitter</span>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => shareToSocial('whatsapp', video.id, video.slug)}
+                                                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-left"
+                                                        >
+                                                            <IconBrandWhatsapp size={18} className="text-green-500" />
+                                                            <span className="text-sm">WhatsApp</span>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleCopyLink(video.id, video.slug)}
+                                                            className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-left"
+                                                        >
+                                                            <IconCopy size={18} className="text-gray-500" />
+                                                            <span className="text-sm">Copy Link</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

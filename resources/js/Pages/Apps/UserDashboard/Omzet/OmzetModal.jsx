@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IconCalendar, IconPackage } from '@tabler/icons-react';
 import { useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import Input from '@/Components/Input';
 import Button from '@/Components/Button';
 import toast from 'react-hot-toast';
@@ -11,14 +12,18 @@ export default function OmzetModal({ isOpen, onClose, product }) {
     const [totalOmzet, setTotalOmzet] = useState(0);
     const { data, setData, post, processing, errors, reset } = useForm({
         product_id: '',
-        jumlah_omzet: '',
+        jumlah_omzet: 1,
         tanggal: new Date().toISOString().split('T')[0]
     });
 
     useEffect(() => {
         if (isOpen) {
             setIsAnimating(true);
-            setData('product_id', product?.id);
+            setData({
+                product_id: product?.id,
+                jumlah_omzet: 1,
+                tanggal: new Date().toISOString().split('T')[0]
+            });
         } else {
             setIsAnimating(false);
             reset();
@@ -55,6 +60,7 @@ export default function OmzetModal({ isOpen, onClose, product }) {
                 toast.success('Data omzet berhasil disimpan!');
                 onClose();
                 reset();
+                router.visit('/apps/user-dashboard');
             },
             onError: () => {
                 toast.dismiss(loadingToast);
@@ -79,73 +85,97 @@ export default function OmzetModal({ isOpen, onClose, product }) {
             <div className={`fixed bottom-0 inset-x-0 transform transition-transform duration-300 ease-in-out ${
                 isAnimating ? 'translate-y-0' : 'translate-y-full'
             }`}>
-                <div className="bg-white dark:bg-gray-800 rounded-t-xl p-6 w-full max-w-5xl mx-auto">
-                    <div className="flex items-center gap-6">
-                        {/* Product Image */}
-                        <div className="w-1/4 lg:w-1/5 flex items-center justify-center">
-                            <div className="w-full aspect-square rounded-lg overflow-hidden">
-                                {product?.foto_produk ? (
-                                    <img
-                                        src={product.foto_produk}
-                                        alt={product.nama_produk}
-                                        className="w-full h-full object-contain"
+                <div className="bg-white rounded-t-xl p-6 w-full h-[680px] mx-auto">
+                    {/* Title and Illustration */}
+                    <div className="text-left">
+                        <h2 className="text-xl font-medium">Simpan dan catat omzetmu</h2>
+                        <img 
+                            src="/images/popup-add.png" 
+                            alt="popup-add" 
+                            className="w-[223px] h-[223px] mx-auto mb-1"
+                        />
+                    </div>
+
+                    {/* Form Container with Border */}
+                    <div className="border-2 border-[#DD661D66] rounded-lg p-4 mb-4">
+                        <div className="flex items-center gap-6">
+                            {/* Product Image */}
+                            <div className="w-1/4 lg:w-1/5 flex items-center justify-center">
+                                <div className="w-full aspect-square rounded-lg overflow-hidden">
+                                    {product?.foto_produk ? (
+                                        <img
+                                            src={product.foto_produk}
+                                            alt={product.nama_produk}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <IconPackage size={48} className="text-gray-400" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Form */}
+                            <div className="w-3/4 lg:w-4/5 space-y-2">
+                                <Input
+                                    type="text"
+                                    label={<span className="text-black">Nama Produk/Jasa</span>}
+                                    value={product?.nama_produk}
+                                    readOnly
+                                    className="border border-[#DD661D66]"
+                                />
+                                <div className="space-y-1">
+                                    <QuantityInput
+                                        label={<span className="text-black">Jumlah produk terjual</span>}
+                                        value={parseInt(data.jumlah_omzet) || 1}
+                                        onChange={value => setData('jumlah_omzet', value)}
+                                        min={1}
+                                        errors={errors.jumlah_omzet}
+                                        className="h-10 w-full shadow-sm"
                                     />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <IconPackage size={48} className="text-gray-400" />
-                                    </div>
-                                )}
+                                    {data.jumlah_omzet > 0 && (
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-medium text-black">Total Omzet</label>
+                                            <div className="border border-[#DD661D66] rounded-lg px-3 py-2 bg-white">
+                                                <span className="text-sm text-black">
+                                                    {formatRupiah(totalOmzet)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <Input
+                                    type="date"
+                                    label={<span className="text-black">Tanggal</span>}
+                                    value={data.tanggal}
+                                    onChange={e => setData('tanggal', e.target.value)}
+                                    errors={errors.tanggal}
+                                    icon={<IconCalendar size={20} />}
+                                    className="border border-[#DD661D66]"
+                                />
                             </div>
                         </div>
-
-                        {/* Form */}
-                        <form onSubmit={handleSubmit} className="w-3/4 lg:w-4/5 space-y-4">
-                            <Input
-                                type="text"
-                                label="Nama Produk/Jasa"
-                                value={product?.nama_produk}
-                                readOnly
-                            />
-                            <div className="space-y-1">
-                                <QuantityInput
-                                    label="Jumlah produk terjual"
-                                    value={parseInt(data.jumlah_omzet) || 1}
-                                    onChange={value => setData('jumlah_omzet', value)}
-                                    min={1}
-                                    errors={errors.jumlah_omzet}
-                                />
-                                {data.jumlah_omzet > 0 && (
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                                        Total Omzet: {formatRupiah(totalOmzet)}
-                                    </div>
-                                )}
-                            </div>
-                            <Input
-                                type="date"
-                                label="Tanggal"
-                                value={data.tanggal}
-                                onChange={e => setData('tanggal', e.target.value)}
-                                errors={errors.tanggal}
-                                icon={<IconCalendar size={20} />}
-                            />
-
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    label="Batal"
-                                    variant="gray"
-                                    className="flex-1 [&>span]:!block"
-                                    onClick={onClose}
-                                />
-                                <Button
-                                    type="submit"
-                                    label="Simpan"
-                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 [&>span]:!block"
-                                    disabled={processing}
-                                />
-                            </div>
-                        </form>
                     </div>
+
+                    {/* Buttons outside border */}
+                    <form onSubmit={handleSubmit}>
+                        <div className="flex gap-2 justify-end">
+                            <Button
+                                type="button"
+                                label="Batal"
+                                variant="gray"
+                                className="w-[118px] h-[40px] flex items-center justify-center [&>span]:!block border border-[#AA51DF]"
+                                onClick={onClose}
+                            />
+                            <Button
+                                type="submit"
+                                label="Simpan"
+                                className="w-[118px] h-[40px] bg-[#AA51DF] hover:bg-indigo-700 flex items-center justify-center [&>span]:!block"
+                                disabled={processing}
+                            />
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
