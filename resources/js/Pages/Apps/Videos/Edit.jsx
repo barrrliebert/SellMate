@@ -12,7 +12,7 @@ export default function Edit({ video }) {
         title: video.title,
         description: video.description,
         source: video.source,
-        video_file: null,
+        video_file: null
     });
 
     const [previewVideo, setPreviewVideo] = useState(video.video_file);
