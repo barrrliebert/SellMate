@@ -49,10 +49,10 @@ export default function Index({ products }) {
    <div className="mx-6 flex flex-col">
     {/* Bagian Judul */}
     <div className="mb-2">
-        <h1 className="text-5xl font-bold text-black">
+        <h1 className="text-5xl font-bold mb-2 text-black">
             Katalog Produk
         </h1>
-        <p className="text-xl text-gray-600">
+        <p className="text-lg text-gray-600">
             Kelola produk unggulan tefa dengan mudah
         </p>
     </div>
