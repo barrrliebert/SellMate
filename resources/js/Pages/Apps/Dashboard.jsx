@@ -169,7 +169,7 @@ export default function Dashboard({ auth }) {
 
         return (
             <Menu as="div" className="relative text-gray-600">
-                <Menu.Button className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 ${currentFilter.type !== 'all' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:ring-blue-500/70' : ''}`}>
+                <Menu.Button className={`inline-flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 ${currentFilter.type !== 'all' ? 'ring-2 ring-blue-500/30' : ''}`}>
                     <IconFilter size={16} strokeWidth={1.5} />
                 </Menu.Button>
                 <Menu.Items className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border dark:border-gray-800 py-1 z-50">
@@ -258,11 +258,12 @@ export default function Dashboard({ auth }) {
             <Menu as="div" className="relative">
                 <Menu.Button 
                     disabled={exportLoading}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 disabled:opacity-70"
                 >
                     {exportLoading ? 'Mengexport...' : (
                         <>
                             <IconDownload size={16} strokeWidth={1.5} />
+                            Export
                         </>
                     )}
                 </Menu.Button>
@@ -320,13 +321,73 @@ export default function Dashboard({ auth }) {
             <Head title='Dashboard'/>
             
             {/* Headlines */}
-            <div className='px-4 lg:px-0 mb-6'>
-                <h1 className='text-2xl font-bold text-gray-800 dark:text-gray-200'>
-                    Dashboard
-                </h1>
-                <p className='text-gray-600 dark:text-gray-400 text-sm'>
-                    Tetap monitoring progress dan update aktivitas pendapatan Tefa
-                </p>
+            <div className='px-4 lg:px-0 mb-6 mt-6 md:mt-0 flex justify-between items-center'>
+                <div>
+                    <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-200'>
+                        Dashboard
+                    </h1>
+                    <p className='text-gray-600 dark:text-gray-400 text-sm'>
+                        Tetap monitoring progress dan update aktivitas pendapatan Tefa
+                    </p>
+                </div>
+                <Menu as="div" className="relative">
+                    <Menu.Button 
+                        disabled={exportLoading}
+                        className="inline-flex items-center mt-6 gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 disabled:opacity-70"
+                    >
+                        {exportLoading ? 'Mengexport...' : (
+                            <>
+                                Export
+                                <IconDownload size={16} strokeWidth={1.5} />
+                            </>
+                        )}
+                    </Menu.Button>
+                    <Menu.Items className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border dark:border-gray-800 py-1 z-50">
+                        {filterOptions.map((option) => (
+                            <Menu.Item key={option.value}>
+                                {({ active }) => (
+                                    <button
+                                        onClick={() => handleExport(option.value)}
+                                        className={`${
+                                            active ? 'bg-gray-100 dark:bg-gray-800' : ''
+                                        } w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                )}
+                            </Menu.Item>
+                        ))}
+                        <div className="px-4 py-2 border-t dark:border-gray-800">
+                            <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">Pilih Tanggal Export:</p>
+                            <div className="space-y-2">
+                                <input
+                                    type="date"
+                                    className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                                    value={dateFilter.export.startDate}
+                                    onChange={(e) => setDateFilter({
+                                        ...dateFilter,
+                                        export: { ...dateFilter.export, startDate: e.target.value }
+                                    })}
+                                />
+                                <input
+                                    type="date"
+                                    className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                                    value={dateFilter.export.endDate}
+                                    onChange={(e) => setDateFilter({
+                                        ...dateFilter,
+                                        export: { ...dateFilter.export, endDate: e.target.value }
+                                    })}
+                                />
+                                <button
+                                    onClick={() => handleExport('custom')}
+                                    className="w-full px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                >
+                                    Export Custom
+                                </button>
+                            </div>
+                        </div>
+                    </Menu.Items>
+                </Menu>
             </div>
 
             <div className='grid grid-cols-12 gap-4 px-4 lg:px-0'>
@@ -341,31 +402,31 @@ export default function Dashboard({ auth }) {
                             total={loading ? 'Loading...' : totalOmzet}
                         />
                 <Widget
-                    title={'Produk'}
+                    title={'Produk Tefa'}
                     color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
                     icon={<IconBox size={'20'} strokeWidth={'1.5'}/>}
-                            total={loading ? 'Loading...' : totalProducts}
+                            total={loading ? 'Loading...' : `${totalProducts} Produk`}
                 />
                 <Widget
-                            title={'Pengguna'}
+                            title={'Total User'}
                     color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
                     icon={<IconUsers size={'20'} strokeWidth={'1.5'}/>}
-                            total={loading ? 'Loading...' : totalUsers}
+                            total={loading ? 'Loading...' : `${totalUsers} User `}
                 />
             </div>
 
                     {/* Top High Omzet */}
                     <Table.Card
-                        title={'Top High Omzet'}
+                        title={'Top Omzet'}
                         action={
                             <div className="flex items-center gap-2">
-                                <div className="w-64 relative">
+                                <div className="w-48 relative">
                                     <input
                                         type="text"
                                         value={searchTopUsers}
                                         onChange={(e) => setSearchTopUsers(e.target.value)}
                                         placeholder="Cari berdasarkan nama..."
-                                        className="py-2 px-4 pr-11 block w-full rounded-lg text-sm border focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white border-gray-200 focus:border-gray-200 dark:focus:ring-gray-500 dark:focus:border-gray-800 dark:text-gray-200 dark:bg-gray-950 dark:border-gray-900"
+                                        className="py-2 px-4 pr-11 block w-full rounded-lg text-sm border-2 border-[#D4A8EF] focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white focus:border-[#D4A8EF] dark:focus:ring-gray-500 dark:focus:border-[#D4A8EF] dark:text-gray-200 dark:bg-gray-950 dark:border-[#D4A8EF]"
                                     />
                                     <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none pr-4">
                                         <IconSearch className="text-gray-500 w-5 h-5"/>
@@ -452,16 +513,16 @@ export default function Dashboard({ auth }) {
                 {/* Right side - History Transaksi */}
                 <div className='col-span-12 lg:col-span-5'>
                     <Table.Card
-                        title={'History Transaksi'}
+                        title={'History Transaksi Omzet'}
                         action={
                             <div className="flex items-center gap-2">
-                                <div className="w-64 relative">
+                                <div className="w-48 relative">
                                     <input
                                         type="text"
                                         value={searchTransactions}
                                         onChange={(e) => setSearchTransactions(e.target.value)}
                                         placeholder="Cari berdasarkan nama..."
-                                        className="py-2 px-4 pr-11 block w-full rounded-lg text-sm border focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white border-gray-200 focus:border-gray-200 dark:focus:ring-gray-500 dark:focus:border-gray-800 dark:text-gray-200 dark:bg-gray-950 dark:border-gray-900"
+                                        className="py-2 px-4 pr-11 block w-full rounded-lg text-sm border-2 border-[#D4A8EF] focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white focus:border-[#D4A8EF] dark:focus:ring-gray-500 dark:focus:border-[#D4A8EF] dark:text-gray-200 dark:bg-gray-950 dark:border-[#D4A8EF]"
                                     />
                                     <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none pr-4">
                                         <IconSearch className="text-gray-500 w-5 h-5"/>
@@ -473,63 +534,6 @@ export default function Dashboard({ auth }) {
                                     onFilterChange={(type) => handleFilterChange('transactions', type)}
                                     onDateChange={(type, value) => handleDateChange('transactions', type, value)}
                                 />
-                                <Menu as="div" className="relative">
-                                    <Menu.Button 
-                                        disabled={exportLoading}
-                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors duration-200 disabled:opacity-70"
-                                    >
-                                        {exportLoading ? 'Mengexport...' : (
-                                            <>
-                                                <IconDownload size={16} strokeWidth={1.5} />
-                                            </>
-                                        )}
-                                    </Menu.Button>
-                                    <Menu.Items className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border dark:border-gray-800 py-1 z-50">
-                                        {filterOptions.map((option) => (
-                                            <Menu.Item key={option.value}>
-                                                {({ active }) => (
-                                                    <button
-                                                        onClick={() => handleExport(option.value)}
-                                                        className={`${
-                                                            active ? 'bg-gray-100 dark:bg-gray-800' : ''
-                                                        } w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
-                                                    >
-                                                        {option.label}
-                                                    </button>
-                                                )}
-                                            </Menu.Item>
-                                        ))}
-                                        <div className="px-4 py-2 border-t dark:border-gray-800">
-                                            <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">Pilih Tanggal Export:</p>
-                                            <div className="space-y-2">
-                                                <input
-                                                    type="date"
-                                                    className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
-                                                    value={dateFilter.export.startDate}
-                                                    onChange={(e) => setDateFilter({
-                                                        ...dateFilter,
-                                                        export: { ...dateFilter.export, startDate: e.target.value }
-                                                    })}
-                                                />
-                                                <input
-                                                    type="date"
-                                                    className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
-                                                    value={dateFilter.export.endDate}
-                                                    onChange={(e) => setDateFilter({
-                                                        ...dateFilter,
-                                                        export: { ...dateFilter.export, endDate: e.target.value }
-                                                    })}
-                                                />
-                                                <button
-                                                    onClick={() => handleExport('custom')}
-                                                    className="w-full px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                                >
-                                                    Export Custom
-                                                </button>
-                        </div>
-                    </div>
-                                    </Menu.Items>
-                                </Menu>
                             </div>
                         }
                     >
@@ -579,7 +583,7 @@ export default function Dashboard({ auth }) {
                         ) : (
                             <div className="text-center p-4 text-gray-500 dark:text-gray-400">
                                 Tidak ada transaksi
-                    </div>
+                            </div>
                         )}
                     </Table.Card>
                 </div>

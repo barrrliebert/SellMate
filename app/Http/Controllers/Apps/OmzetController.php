@@ -113,12 +113,42 @@ class OmzetController extends Controller
     /**
      * Get user's commission records
      */
-    public function getCommissionRecords()
+    public function getCommissionRecords(Request $request)
     {
-        $commissions = Omzet::with('product')
+        $query = Omzet::with('product')
             ->where('user_id', Auth::id())
-            ->latest()
-            ->get()
+            ->latest();
+
+        // Add date filtering
+        if ($request->has('filter_type')) {
+            $filterType = $request->filter_type;
+            $now = now();
+
+            switch ($filterType) {
+                case 'today':
+                    $query->whereDate('tanggal', $now);
+                    break;
+                case 'week':
+                    $startOfWeek = $now->copy()->startOfWeek(Carbon::MONDAY);
+                    $endOfWeek = $now->copy()->endOfWeek(Carbon::SUNDAY);
+                    $query->whereBetween('tanggal', [$startOfWeek, $endOfWeek]);
+                    break;
+                case 'month':
+                    $query->whereMonth('tanggal', $now->month)
+                         ->whereYear('tanggal', $now->year);
+                    break;
+                case 'custom':
+                    if ($request->has('start_date') && $request->has('end_date')) {
+                        $query->whereBetween('tanggal', [
+                            Carbon::parse($request->start_date)->startOfDay(),
+                            Carbon::parse($request->end_date)->endOfDay()
+                        ]);
+                    }
+                    break;
+            }
+        }
+
+        $commissions = $query->get()
             ->map(function($omzet) {
                 return [
                     'tanggal' => $omzet->tanggal,

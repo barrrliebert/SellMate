@@ -44,18 +44,18 @@ export default function AppLayout({ user, header, children }) {
                         <Toaster position='top-right'/>
                         
                         {/* Main content area with speed dial on medium screens and above */}
-                        <div className="flex flex-col md:flex-row">
-                            {/* SpeedDial visible only on medium screens and above */}
-                            <div className="hidden md:block md:sticky md:top-0 md:self-start md:mr-10 ml-6 ">
+                        <div className="flex flex-col md:flex-row relative">
+                            {/* SpeedDial visible only on medium screens and above - fixed position */}
+                            <div className="hidden md:block fixed left-10 top-24 z-50">
                                 <SpeedDial 
                                     isUserAccess={isUserAccess} 
-                                    isOpenByDefault={true} 
+                                    isOpenByDefault={true}
                                     isMediumScreen={true}
                                 />
                             </div>
                             
                             {/* Main content */}
-                            <div className="flex-1">
+                            <div className="flex-1 md:ml-20">
                                 {children}
                             </div>
                         </div>

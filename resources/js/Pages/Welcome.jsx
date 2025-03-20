@@ -20,42 +20,48 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
   return (
     <>
       <Head title="Welcome" />
-      <div className="min-h-screen bg-white flex flex-col">
-        {/* Main Image and Text Section */}
-        <div className="flex-1 flex flex-col px-6 pt-10">
-          {/* Illustration */}
-          <div className="w-full max-w-md mx-auto mb-8">
-            <img
-              src="/images/ilustrator-onboarding.png"
-              className="w-full h-auto"
-            />
+      <div className="min-h-screen bg-white">
+        {/* Main Content Section */}
+        <div className="flex flex-col lg:flex-row min-h-screen">
+          {/* Image Section - Left on large screens, Top on small screens */}
+          <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
+            <div className="w-full max-w-md">
+              <img
+                src="/images/ilustrator-onboarding.png"
+                className="w-full h-auto"
+                alt="SellMate Illustration"
+              />
+            </div>
           </div>
 
-          {/* Text Content */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-black leading-tight">
-              Kelola omzet Tefamu dengan
-              <br />
-              satu genggaman bersama
-              <br />
-              SellMate
-            </h1>
-          </div>
+          {/* Text and Buttons Section - Right on large screens, Bottom on small screens */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 lg:pr-12 lg:pl-0">
+            {/* Text Content */}
+            <div className="mb-8 lg:mb-12">
+              <h1 className="text-2xl lg:text-3xl font-bold text-black leading-tight">
+                Kelola omzet Tefamu dengan
+                <br />
+                satu genggaman bersama
+                <br />
+                SellMate
+              </h1>
+            </div>
 
-          {/* Buttons */}
-          <div className="w-full flex flex-col items-center space-y-3">
-            <Link
-              href={route('register')}
-              className="w-[300px] h-[40px] bg-[#DD661D] text-white text-center py-2 rounded font-medium hover:bg-[#BB551A] transition"
-            >
-              Mulai
-            </Link>
-            <Link
-              href={route('login')}
-              className="w-[300px] h-[40px] border border-[#DD661D] text-center py-2 rounded text-gray-600 font-medium hover:bg-[#BB551A] transition"
-            >
-              Login
-            </Link>
+            {/* Buttons */}
+            <div className="flex flex-col items-center lg:items-start space-y-3">
+              <Link
+                href={route('register')}
+                className="w-full lg:max-w-lg h-[40px] bg-[#DD661D] text-white text-center py-2 rounded font-medium hover:bg-[#BB551A] transition"
+              >
+                Mulai
+              </Link>
+              <Link
+                href={route('login')}
+                className="w-full lg:max-w-lg border border-[#DD661D] text-center py-2 rounded text-gray-600 font-medium hover:bg-[#BB551A] hover:text-white transition"
+              >
+                Login
+              </Link>
+            </div>
           </div>
         </div>
       </div>

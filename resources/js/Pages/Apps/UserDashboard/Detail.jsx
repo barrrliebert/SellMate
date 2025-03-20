@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { IconPackage, IconUser, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import axios from 'axios';
@@ -6,13 +6,18 @@ import axios from 'axios';
 export default function Detail({ type }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState('week'); // 'week' or 'date'
+    const [viewMode, setViewMode] = useState('date'); // 'date' or '1month', '3month', '6month', '12month'
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [sliderView, setSliderView] = useState('weekly'); // 'weekly' or 'monthly'
     const [showCalendar, setShowCalendar] = useState(false);
     const [isSliding, setIsSliding] = useState(false);
     const [touchStartX, setTouchStartX] = useState(0);
     const [touchEndX, setTouchEndX] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Define clickOutside ref
+    const calendarRef = useRef(null);
+    const sliderRef = useRef(null);
 
     const endpoints = {
         transactions: '/apps/omzets/transaction-records',
@@ -30,14 +35,46 @@ export default function Detail({ type }) {
         fetchData();
     }, [type, viewMode, selectedDate]);
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+                setShowCalendar(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const fetchData = async () => {
         try {
-            const response = await axios.get(endpoints[type], {
-                params: {
-                    view_mode: viewMode,
-                    date: selectedDate.toISOString()
+            const params = {};
+            
+            // Add different parameters based on view mode and type
+            if (type !== 'topOmzet') {  // Only add filter params for transactions and commissions
+                if (viewMode === 'week') {
+                    // Get data for the whole week
+                    params.filter_type = 'week';
+                } else if (viewMode === 'date') {
+                    // Get data from selected date to today
+                    params.filter_type = 'custom';
+                    params.start_date = selectedDate.toISOString().split('T')[0];
+                    params.end_date = new Date().toISOString().split('T')[0];
+                } else if (viewMode.includes('month')) {
+                    // Get data for X months back
+                    params.filter_type = 'custom';
+                    const monthsBack = parseInt(viewMode);
+                    const startDate = new Date();
+                    startDate.setMonth(startDate.getMonth() - monthsBack);
+                    params.start_date = startDate.toISOString().split('T')[0];
+                    params.end_date = new Date().toISOString().split('T')[0];
                 }
-            });
+            }
+            
+            const response = await axios.get(endpoints[type], { params });
+            
             setData(type === 'topOmzet' ? response.data.top_users : 
                    type === 'transactions' ? response.data.omzets : 
                    response.data.commissions);
@@ -67,12 +104,62 @@ export default function Detail({ type }) {
         return groupedData;
     };
 
+    const groupDataByDay = (items) => {
+        const groupedData = {};
+        
+        items.forEach(item => {
+            const itemDate = new Date(item.tanggal);
+            
+            // Format tanggal dengan format custom "24 Feb 25"
+            const day = itemDate.getDate().toString().padStart(2, '0');
+            const month = itemDate.toLocaleDateString('id-ID', { month: 'short' });
+            const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+            const year = itemDate.getFullYear().toString().slice(-2);
+            const dateKey = `${day} ${capitalizedMonth} ${year}`;
+            
+            // Store the full date for sorting and formatting
+            if (!groupedData[dateKey]) {
+                groupedData[dateKey] = {
+                    items: [],
+                    fullDate: itemDate
+                };
+            }
+            groupedData[dateKey].items.push(item);
+        });
+
+        // Sort the keys by date (newest first)
+        const sortedKeys = Object.keys(groupedData).sort((a, b) => {
+            const dateA = groupedData[a].fullDate;
+            const dateB = groupedData[b].fullDate;
+            return dateB - dateA;
+        });
+
+        const sortedData = {};
+        sortedKeys.forEach(key => {
+            sortedData[key] = groupedData[key].items;
+        });
+
+        return {
+            sortedData,
+            sortedKeys
+        };
+    };
+
     const getGrade = (totalOmzet) => {
         const omzetValue = parseInt(totalOmzet.replace(/[^0-9]/g, ''));
         if (omzetValue >= 300000) return { grade: 'A', color: 'bg-green-500' };
         if (omzetValue >= 200000) return { grade: 'B', color: 'bg-blue-500' };
         if (omzetValue >= 100000) return { grade: 'C', color: 'bg-yellow-500' };
         return { grade: 'D', color: 'bg-red-500' };
+    };
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleDateString('id-ID', { month: 'short' });
+        const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+        const year = date.getFullYear().toString().slice(-2);
+        return `${day} ${capitalizedMonth} ${year}`;
     };
 
     const renderItem = (item, index) => {
@@ -141,10 +228,7 @@ export default function Detail({ type }) {
                             {item.formatted_omzet}
                         </span>
                         <span className="text-xs text-gray-500">
-                            {new Date(item.tanggal).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'short'
-                            })}
+                            {formatDate(item.tanggal)}
                         </span>
                     </div>
                 </div>
@@ -171,10 +255,7 @@ export default function Detail({ type }) {
                                 {item.product}
                             </span>
                             <span className="text-xs text-gray-500">
-                                {new Date(item.tanggal).toLocaleDateString('id-ID', {
-                                    day: 'numeric',
-                                    month: 'short'
-                                })}
+                                {formatDate(item.tanggal)}
                             </span>
                         </div>
                     </div>
@@ -201,22 +282,6 @@ export default function Detail({ type }) {
                     Tidak ada data
                 </div>
             );
-        }
-
-        if (type === 'transactions' || type === 'commissions') {
-            const groupedData = groupDataByWeek(data);
-            return Object.entries(groupedData).map(([week, items]) => (
-                <div key={week} className="mb-4">
-                    <div className="bg-[#F9E0D1] py-2 px-4">
-                        <h3 className="text-sm font-medium text-gray-900">
-                            Minggu {week}
-                        </h3>
-                    </div>
-                    <div className="bg-white divide-y divide-gray-100">
-                        {items.map((item, index) => renderItem(item, index))}
-                    </div>
-                </div>
-            ));
         }
 
         if (type === 'topOmzet') {
@@ -246,20 +311,41 @@ export default function Detail({ type }) {
             );
         }
 
-        const groupedData = groupDataByWeek(data);
-        return Object.entries(groupedData).map(([week, items]) => (
-            <div key={week} className="mb-8">
-                <div className="dark:bg-gray-800 -mx-6 px-6 py-2" style={{ backgroundColor: '#F9E0D1' }}>
-                    <h3 className="px-2 text-lg font-semibold text-gray-700 dark:text-gray-300">
-                        Minggu {week}
-                    </h3>
-                </div>
+        if (type === 'transactions' || type === 'commissions') {
+            if (viewMode.includes('month')) {
+                // For monthly view, group by day
+                const { sortedData, sortedKeys } = groupDataByDay(data);
+                return sortedKeys.map(date => (
+                    <div key={date} className="mb-4">
+                        <div className="bg-[#F9E0D1] py-2 px-4">
+                            <h3 className="text-sm font-medium text-gray-900">
+                                {date}
+                            </h3>
+                        </div>
+                        <div className="bg-white divide-y divide-gray-100">
+                            {sortedData[date].map((item, index) => renderItem(item, index))}
+                        </div>
+                    </div>
+                ));
+            } else {
+                // For date view (from selected date to today), group by week
+                const groupedData = groupDataByWeek(data);
+                return Object.entries(groupedData).map(([week, items]) => (
+                    <div key={week} className="mb-4">
+                        <div className="bg-[#F9E0D1] py-2 px-4">
+                            <h3 className="text-sm font-medium text-gray-900">
+                                Minggu {week}
+                            </h3>
+                        </div>
+                        <div className="bg-white divide-y divide-gray-100">
+                            {items.map((item, index) => renderItem(item, index))}
+                        </div>
+                    </div>
+                ));
+            }
+        }
 
-                <div className="space-y-4 mt-4">
-                    {items.map((item, index) => renderItem(item, index))}
-                </div>
-            </div>
-        ));
+        return null;
     };
 
     // Date navigation components
@@ -267,6 +353,23 @@ export default function Detail({ type }) {
         setSelectedDate(date);
         setShowCalendar(false);
         setSliderDate(date);
+    };
+
+    const handleSlideChange = (slide) => {
+        setIsSliding(slide);
+        // Reset tambahan
+        setShowCalendar(false);
+        
+        // Atur mode tampilan sesuai slide
+        if (!slide) { // Slide pertama (tanggal ke today)
+            if (viewMode.includes('month')) {
+                setViewMode('date');
+            }
+        } else { // Slide kedua (bulanan)
+            if (!viewMode.includes('month')) {
+                setViewMode('1month');
+            }
+        }
     };
 
     const handleTouchStart = (e) => {
@@ -285,16 +388,75 @@ export default function Detail({ type }) {
         
         if (diff > swipeThreshold) {
             // Swipe left
-            if (!isSliding) setIsSliding(true);
+            handleSlideChange(true);
         } else if (diff < -swipeThreshold) {
             // Swipe right
-            if (isSliding) setIsSliding(false);
+            handleSlideChange(false);
         }
         
         // Reset touch positions
         setTouchStartX(0);
         setTouchEndX(0);
     };
+
+    // Mouse drag handlers
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        setTouchStartX(e.clientX);
+    };
+
+    const handleMouseMove = (e) => {
+        if (isDragging) {
+            setTouchEndX(e.clientX);
+        }
+    };
+
+    const handleMouseUp = () => {
+        if (isDragging) {
+            if (touchStartX && touchEndX) {
+                const diff = touchStartX - touchEndX;
+                const swipeThreshold = 50; // Minimum swipe distance in pixels
+                
+                if (diff > swipeThreshold) {
+                    // Swipe left
+                    handleSlideChange(true);
+                } else if (diff < -swipeThreshold) {
+                    // Swipe right
+                    handleSlideChange(false);
+                }
+            }
+            
+            // Reset
+            setIsDragging(false);
+            setTouchStartX(0);
+            setTouchEndX(0);
+        }
+    };
+
+    // Add mouse leave handler to prevent stuck dragging state
+    const handleMouseLeave = () => {
+        if (isDragging) {
+            setIsDragging(false);
+            setTouchStartX(0);
+            setTouchEndX(0);
+        }
+    };
+
+    // Add useEffect to handle global mouse up
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isDragging) {
+                setIsDragging(false);
+                setTouchStartX(0);
+                setTouchEndX(0);
+            }
+        };
+
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => {
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [isDragging]);
 
     const renderDateNavigation = () => {
         if (sliderView === 'weekly') {
@@ -309,116 +471,97 @@ export default function Detail({ type }) {
 
                         {/* Sliding Container */}
                         <div 
+                            ref={sliderRef}
                             className="overflow-hidden pt-6"
                             onTouchStart={handleTouchStart}
                             onTouchMove={handleTouchMove}
                             onTouchEnd={handleTouchEnd}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseLeave}
+                            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
                         >
                             <div 
                                 className={`flex transition-transform duration-300 gap-2 ${
                                     isSliding ? 'transform translate-x-[-100%]' : ''
                                 }`}
                             >
-                                {/* Daily View - Updated styling */}
+                                {/* First Slide - Date/Today */}
                                 <div className="w-full flex-shrink-0">
-                                    <div className="bg-white rounded-full flex items-center h-[29px] relative border border-[#EDA375] max-w-[382px] mx-auto">
+                                    <div className="bg-white rounded-full flex items-center h-[30px] relative border border-[#EDA375] max-w-[382px] mx-auto overflow-hidden">
                                         <button 
-                                            onClick={() => setShowCalendar(true)}
-                                            className="flex-1 px-4 text-sm text-black text-center"
+                                            onClick={() => {
+                                                setShowCalendar(true);
+                                                setViewMode('date');
+                                            }}
+                                            className="flex-1 h-full flex items-center justify-center text-sm text-gray-800"
                                         >
-                                            {selectedDate.toLocaleDateString('id-ID', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: '2-digit'
-                                            })}
+                                            {formatDate(selectedDate)}
                                         </button>
-                                        <div className="h-full w-[30px] bg-[#EDA375]"></div>
+                                        <div className="h-full w-[30px] bg-[#F3BA9B]"></div>
                                         <button 
                                             onClick={() => {
                                                 setSelectedDate(new Date());
                                                 setShowCalendar(false);
+                                                setViewMode('date');
                                             }}
-                                            className="flex-1 px-4 text-sm text-black text-center"
+                                            className="flex-1 h-full flex items-center justify-center text-sm text-gray-800"
                                         >
                                             Today
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* Monthly View */}
-                                <div className="w-full flex-shrink-0">
-                                    <div className="bg-white rounded-[10px] flex items-center h-[29px] relative border border-[#EDA375] max-w-[382px] mx-auto justify-center">
-                                        <div className="flex-1 flex justify-around items-center">
-                                            <button 
-                                                onClick={() => {
-                                                    const newDate = new Date();
-                                                    newDate.setMonth(newDate.getMonth() - 1);
-                                                    setSelectedDate(newDate);
-                                                    setViewMode('1month');
-                                                }}
-                                                className={`px-2 text-sm text-black flex-1 ${
-                                                    viewMode === '1month' ? 'bg-[#EDA375]' : 'bg-white'
-                                                }`}
-                                            >
-                                                1 bulan
-                                            </button>
-                                            <div className="h-[18px] w-px bg-[#EDA375]"></div>
-                                            <button 
-                                                onClick={() => {
-                                                    const newDate = new Date();
-                                                    newDate.setMonth(newDate.getMonth() - 3);
-                                                    setSelectedDate(newDate);
-                                                    setViewMode('3month');
-                                                }}
-                                                className={`px-2 text-sm text-black flex-1 ${
-                                                    viewMode === '3month' ? 'bg-[#EDA375]' : 'bg-white'
-                                                }`}
-                                            >
-                                                3 bulan
-                                            </button>
-                                            <div className="h-[18px] w-px bg-[#EDA375]"></div>
-                                            <button 
-                                                onClick={() => {
-                                                    const newDate = new Date();
-                                                    newDate.setMonth(newDate.getMonth() - 6);
-                                                    setSelectedDate(newDate);
-                                                    setViewMode('6month');
-                                                }}
-                                                className={`px-2 text-sm text-black flex-1 ${
-                                                    viewMode === '6month' ? 'bg-[#EDA375]' : 'bg-white'
-                                                }`}
-                                            >
-                                                6 bulan
-                                            </button>
-                                            <div className="h-[18px] w-px bg-[#EDA375]"></div>
-                                            <button 
-                                                onClick={() => {
-                                                    const newDate = new Date();
-                                                    newDate.setMonth(newDate.getMonth() - 12);
-                                                    setSelectedDate(newDate);
-                                                    setViewMode('12month');
-                                                }}
-                                                className={`px-2 text-sm text-black flex-1 ${
-                                                    viewMode === '12month' ? 'bg-[#EDA375]' : 'bg-white'
-                                                }`}
-                                            >
-                                                1 tahun
-                                            </button>
-                                        </div>
+                                {/* Monthly View - Second Slide */}
+                                <div className="w-full flex-shrink-0 pr-4">
+                                    <div className="flex items-center h-[30px] relative rounded-full overflow-hidden border border-[#EDA375] max-w-[382px] mx-auto">
+                                        <button 
+                                            onClick={() => setViewMode('1month')}
+                                            className={`flex-1 h-full px-2 text-sm text-black text-center ${
+                                                viewMode === '1month' ? 'bg-[#F3BA9B]' : 'bg-white'
+                                            }`}
+                                        >
+                                            1 bulan
+                                        </button>
+                                        <button 
+                                            onClick={() => setViewMode('3month')}
+                                            className={`flex-1 h-full px-2 text-sm text-black text-center ${
+                                                viewMode === '3month' ? 'bg-[#F3BA9B]' : 'bg-white'
+                                            }`}
+                                        >
+                                            3 bulan
+                                        </button>
+                                        <button 
+                                            onClick={() => setViewMode('6month')}
+                                            className={`flex-1 h-full px-2 text-sm text-black text-center ${
+                                                viewMode === '6month' ? 'bg-[#F3BA9B]' : 'bg-white'
+                                            }`}
+                                        >
+                                            6 bulan
+                                        </button>
+                                        <button 
+                                            onClick={() => setViewMode('12month')}
+                                            className={`flex-1 h-full px-2 text-sm text-black text-center ${
+                                                viewMode === '12month' ? 'bg-[#F3BA9B]' : 'bg-white'
+                                            }`}
+                                        >
+                                            1 tahun
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Dot Navigation */}
-                            <div className="flex justify-center gap-1 mt-3">
+                            <div className="flex justify-center gap-1 mt-3 pb-3">
                                 <button
-                                    onClick={() => setIsSliding(false)}
+                                    onClick={() => handleSlideChange(false)}
                                     className={`w-1.5 h-1.5 rounded-full transition-colors ${
                                         !isSliding ? 'bg-[#EDA375]' : 'bg-[#D9D9D9]'
                                     }`}
                                 />
                                 <button
-                                    onClick={() => setIsSliding(true)}
+                                    onClick={() => handleSlideChange(true)}
                                     className={`w-1.5 h-1.5 rounded-full transition-colors ${
                                         isSliding ? 'bg-[#EDA375]' : 'bg-[#D9D9D9]'
                                     }`}
@@ -427,16 +570,17 @@ export default function Detail({ type }) {
                         </div>
 
                         {showCalendar && (
-                            <div className="absolute bottom-full left-6 mb-2 bg-white rounded-lg shadow-lg p-2">
+                            <div ref={calendarRef} className="absolute bottom-full left-6 mb-2 bg-white rounded-lg shadow-lg p-2">
                                 <input 
                                     type="date" 
                                     value={selectedDate.toISOString().split('T')[0]}
                                     onChange={(e) => {
-                                        setSelectedDate(new Date(e.target.value));
+                                        const newDate = new Date(e.target.value);
+                                        setSelectedDate(newDate);
+                                        setViewMode('date');
                                         setShowCalendar(false);
                                     }}
-                                    min={new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                                    max={new Date().toISOString().split('T')[0]}
+                                    max={new Date().toISOString().split('T')[0]} // Can't select future dates
                                     className="p-2 border rounded-lg"
                                 />
                             </div>
@@ -455,9 +599,6 @@ export default function Detail({ type }) {
                                     const months = period === '1 bulan' ? 1 : 
                                                  period === '3 bulan' ? 3 :
                                                  period === '6 bulan' ? 6 : 12;
-                                    const newDate = new Date();
-                                    newDate.setMonth(newDate.getMonth() - months);
-                                    setSelectedDate(newDate);
                                     setViewMode(`${months}month`);
                                 }}
                                 className={`px-4 py-1.5 text-sm rounded-full ${
@@ -480,7 +621,7 @@ export default function Detail({ type }) {
             <Head title={titles[type]} />
             
             <div className="min-h-screen bg-white">
-                {/* Header - Updated with larger text size */}
+                {/* Header */}
                 <div className="flex items-center p-4 bg-white border-b">
                     <Link href="/apps/user-dashboard" className="text-gray-800">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -497,7 +638,7 @@ export default function Detail({ type }) {
                     {renderContent()}
                 </div>
 
-                {/* Footer Navigation */}
+                {/* Footer Navigation - Only show for transactions and commissions */}
                 {(type === 'transactions' || type === 'commissions') && renderDateNavigation()}
             </div>
         </>

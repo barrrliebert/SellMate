@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -35,8 +35,7 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email wajib diisi',
-            'email.email' => 'Format email tidak valid',
+            'email.required' => 'Email atau username wajib diisi',
             'password.required' => 'Password wajib diisi',
         ];
     }
@@ -50,18 +49,21 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Check if email exists
-        $user = \App\Models\User::where('email', $this->email)->first();
+        $credentials = $this->only('email', 'password');
+        $loginType = filter_var($credentials['email'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        
+        // Check if user exists
+        $user = \App\Models\User::where($loginType, $credentials['email'])->first();
         
         if (!$user) {
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
-                'email' => 'Email tidak terdaftar.',
+                'email' => $loginType === 'email' ? 'Email tidak terdaftar.' : 'Username tidak terdaftar.',
             ]);
         }
 
-        // Check password
-        if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Attempt to authenticate
+        if (!Auth::attempt([$loginType => $credentials['email'], 'password' => $credentials['password']], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'password' => 'Password salah.',

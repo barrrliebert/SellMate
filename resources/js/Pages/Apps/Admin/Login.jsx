@@ -51,7 +51,7 @@ export default function Login({ status }) {
                                     </label>
                                     <input
                                         id="email"
-                                        type="email"
+                                        type="text"
                                         name="email"
                                         value={data.email}
                                         className="w-full p-2 rounded-lg text-gray-700 text-sm"
