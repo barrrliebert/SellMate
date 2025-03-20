@@ -33,7 +33,7 @@ export default function Index({ products }) {
                             <IconChevronLeft size={24} strokeWidth={1.5} />
                         </Link>
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                            Produk Unggulan Tefa
+                        Produk Unggulan Tefa
                         </h1>
                     </div>
 
@@ -41,15 +41,15 @@ export default function Index({ products }) {
                         {products?.map((product) => (
                             <div 
                                 key={product.id} 
-                                className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden"
+                                className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-[#DD661D80]"
                             >
-                                <div className="p-4 flex items-center space-x-4">
-                                    <div className="flex-shrink-0 h-14 bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden">
+                                <div className="p-4 flex space-x-4">
+                                    <div className="flex-shrink-0 w-[111px] h-[111px] bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden border border-[#DD661D80]">
                                         {product.foto_produk ? (
                                             <img
                                                 src={product.foto_produk}
                                                 alt={product.nama_produk}
-                                                className="w-full h-full object-contain"
+                                                className="w-full h-full object-cover"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
@@ -59,22 +59,24 @@ export default function Index({ products }) {
                                     </div>
                                     
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                                        <h3 className="text-lg font-medium text-black dark:text-white font-[Verdana]">
                                             {product.nama_produk}
                                         </h3>
-                                        <div className="flex justify-start items-center text-sm">
-                                            <div>
-                                                <span className="text-xs text-gray-600 dark:text-gray-400">Harga: {product.formatted_harga}</span>
-                                            </div>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs text-black dark:text-gray-400 font-[Verdana]">
+                                                {product.formatted_harga}
+                                            </span>
+                                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                Produk
+                                            </span>
+                                            <button 
+                                                onClick={() => handleProductClick(product)}
+                                                className="w-[68px] h-[28px] flex items-center justify-center bg-[#AA51DF] hover:bg-[#9543c5] text-white rounded-lg transition mt-3 text-xs font-[Verdana] font-light"
+                                            >
+                                                Tambah
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <button 
-                                        onClick={() => handleProductClick(product)}
-                                        className="text-md lg:text-lg bg-gray-600 hover:bg-gray-700 text-white px-4 lg:px-8 py-1 rounded-lg transition"
-                                    >
-                                        Pilih
-                                    </button>
                                 </div>
                             </div>
                         ))}

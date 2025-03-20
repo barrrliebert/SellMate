@@ -340,19 +340,19 @@ export default function Dashboard({ auth }) {
                             icon={<IconWallet size={'20'} strokeWidth={'1.5'}/>}
                             total={loading ? 'Loading...' : totalOmzet}
                         />
-                        <Widget
-                            title={'Produk'}
-                            color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
-                            icon={<IconBox size={'20'} strokeWidth={'1.5'}/>}
+                <Widget
+                    title={'Produk'}
+                    color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
+                    icon={<IconBox size={'20'} strokeWidth={'1.5'}/>}
                             total={loading ? 'Loading...' : totalProducts}
-                        />
-                        <Widget
+                />
+                <Widget
                             title={'Pengguna'}
-                            color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
-                            icon={<IconUsers size={'20'} strokeWidth={'1.5'}/>}
+                    color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
+                    icon={<IconUsers size={'20'} strokeWidth={'1.5'}/>}
                             total={loading ? 'Loading...' : totalUsers}
-                        />
-                    </div>
+                />
+            </div>
 
                     {/* Top High Omzet */}
                     <Table.Card
@@ -385,17 +385,17 @@ export default function Dashboard({ auth }) {
                                 Loading...
                             </div>
                         ) : topUsers.length > 0 ? (
-                            <Table>
-                                <Table.Thead>
-                                    <tr>
+                        <Table>
+                            <Table.Thead>
+                                <tr>
                                         <Table.Th className="w-10">No</Table.Th>
                                         <Table.Th>Nama</Table.Th>
                                         <Table.Th>Jurusan</Table.Th>
                                         <Table.Th className="text-right">Total Omzet</Table.Th>
                                         <Table.Th className="text-center">Nilai</Table.Th>
-                                    </tr>
-                                </Table.Thead>
-                                <Table.Tbody>
+                                </tr>
+                            </Table.Thead>
+                            <Table.Tbody>
                                     {topUsers.map((user, i) => {
                                         const { grade, color } = getGrade(user.formatted_omzet);
                                         return (
@@ -420,8 +420,8 @@ export default function Dashboard({ auth }) {
                                                             {user.name}
                                                         </span>
                                                     </div>
-                                                </Table.Td>
-                                                <Table.Td>
+                                        </Table.Td>
+                                        <Table.Td>
                                                     <span className="text-gray-600 dark:text-gray-400">
                                                         {user.major || 'Belum diisi'}
                                                     </span>
@@ -430,17 +430,17 @@ export default function Dashboard({ auth }) {
                                                     <span className="font-medium text-gray-900 dark:text-gray-100">
                                                         {user.formatted_omzet}
                                                     </span>
-                                                </Table.Td>
+                                        </Table.Td>
                                                 <Table.Td className="text-center">
                                                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${color} text-white`}>
                                                         {grade}
                                                     </span>
-                                                </Table.Td>
-                                            </tr>
+                                        </Table.Td>
+                                    </tr>
                                         );
                                     })}
-                                </Table.Tbody>
-                            </Table>
+                            </Table.Tbody>
+                        </Table>
                         ) : (
                             <div className="text-center p-4 text-gray-500 dark:text-gray-400">
                                 Tidak ada data
@@ -526,8 +526,8 @@ export default function Dashboard({ auth }) {
                                                 >
                                                     Export Custom
                                                 </button>
-                                            </div>
-                                        </div>
+                        </div>
+                    </div>
                                     </Menu.Items>
                                 </Menu>
                             </div>
@@ -579,7 +579,7 @@ export default function Dashboard({ auth }) {
                         ) : (
                             <div className="text-center p-4 text-gray-500 dark:text-gray-400">
                                 Tidak ada transaksi
-                            </div>
+                    </div>
                         )}
                     </Table.Card>
                 </div>

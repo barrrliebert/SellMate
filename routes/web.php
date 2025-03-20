@@ -3,14 +3,14 @@
 use App\Http\Controllers\Apps\DashboardController;
 use App\Http\Controllers\Apps\PermissionController;
 use App\Http\Controllers\Apps\ProductController;
-use App\Http\Controllers\Apps\VideoController;
 use App\Http\Controllers\Apps\RoleController;
 use App\Http\Controllers\Apps\UserController;
 use App\Http\Controllers\Apps\UserDashboardController;
-use App\Http\Controllers\Apps\ArticleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Apps\OmzetController;
 use App\Http\Controllers\Apps\TargetController;
+use App\Http\Controllers\Apps\VideoController;
+use App\Http\Controllers\Apps\ArticleController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,6 +23,15 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+// Admin route - public access
+Route::get('/admin', function() {
+    return Inertia::render('Apps/Admin/Index');
+})->name('admin');
+
+Route::get('/admin/login', function() {
+    return Inertia::render('Apps/Admin/Login');
+})->name('admin.login');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -42,6 +51,10 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
     Route::get('/user-dashboard/top-omzet', [UserDashboardController::class, 'topOmzet'])->middleware('role:users-access')->name('user.top-omzet');
     Route::get('/user-dashboard/target', [UserDashboardController::class, 'target'])->middleware('role:users-access')->name('user.target');
     Route::get('/user-dashboard/target/edit', [UserDashboardController::class, 'editTarget'])->middleware('role:users-access')->name('user.target.edit');
+    Route::get('/user-dashboard/video', [UserDashboardController::class, 'video'])->middleware('role:users-access')->name('user.video');
+    Route::get('/user-dashboard/video/{video}', [UserDashboardController::class, 'showVideo'])->middleware('role:users-access')->name('user.video.show');
+    Route::get('/user-dashboard/article', [UserDashboardController::class, 'article'])->middleware('role:users-access')->name('user.article');
+    Route::get('/user-dashboard/article/{article}', [UserDashboardController::class, 'showArticle'])->middleware('role:users-access')->name('user.article.show');
     
     // omzet routes
     Route::post('/omzets', [OmzetController::class, 'store'])->middleware('permission:omzet-create')->name('omzets.store');

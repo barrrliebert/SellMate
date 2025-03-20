@@ -31,7 +31,7 @@ class ArticleController extends Controller
         $articles = $this->repository->getAll();
 
         return inertia('Apps/Articles/Index', [
-            'articles' => $articles  // Pastikan articles memiliki property 'data'
+            'articles' => $articles  // $articles harus punya property 'data'
         ]);
     }
 

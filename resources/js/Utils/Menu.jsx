@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { IconCirclePlus, IconLayout2, IconTable, IconUserBolt, IconUserShield, IconUsers, IconBox, IconPackage, IconSquareRoundedPlusFilled, IconTarget, IconVideo, IconArticle } from '@tabler/icons-react';
+import { IconCirclePlus, IconLayout2, IconTable, IconUserBolt, IconUserShield, IconUsers, IconBox, IconPackage, IconSquareRoundedPlusFilled, IconTarget, IconArticle, IconVideo } from '@tabler/icons-react';
 import hasAnyPermission from './Permissions';
 import React from 'react'
 
@@ -15,7 +15,7 @@ export default function Menu() {
     const menuNavigation = [
         {
             title: 'Overview',
-            permissions: true, // Always show for all users
+            permissions: true,
             details: [
                 {
                     title: 'Dashboard',
@@ -24,7 +24,7 @@ export default function Menu() {
                         ? url === '/apps/user-dashboard'
                         : url === '/apps/dashboard',
                     icon: <IconLayout2 size={20} strokeWidth={1.5}/>,
-                    permissions: true, // Always show for all users
+                    permissions: true,
                 }
             ]
         },
@@ -45,6 +45,20 @@ export default function Menu() {
                     href: '/apps/user-dashboard/target',
                     active: url.startsWith('/apps/user-dashboard/target'),
                     icon: <IconTarget size={20} strokeWidth={1.5}/>,
+                    permissions: true,
+                },
+                {
+                    title: 'Video',
+                    href: '/apps/user-dashboard/video',
+                    active: url.startsWith('/apps/user-dashboard/video'),
+                    icon: <IconVideo size={20} strokeWidth={1.5}/>,
+                    permissions: true,
+                },
+                {
+                    title: 'Artikel',
+                    href: '/apps/user-dashboard/article',
+                    active: url.startsWith('/apps/user-dashboard/article'),
+                    icon: <IconArticle size={20} strokeWidth={1.5}/>,
                     permissions: true,
                 }
             ]

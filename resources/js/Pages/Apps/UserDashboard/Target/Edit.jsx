@@ -27,35 +27,44 @@ export default function Edit() {
     };
 
     const handleCancel = () => {
-        router.visit(route('apps.user.target'), {
+        router.visit(route('apps.user.dashboard'), {
             preserveState: false,
             preserveScroll: false
         });
     };
 
-    useEffect(() => {
-        const fetchTarget = async () => {
-            try {
-                const response = await axios.get('/apps/targets/current');
-                if (response.data.target) {
-                    setExistingTarget(response.data.target);
-                    setData({
-                        judul_target: response.data.target.judul_target,
-                        tanggal_target: response.data.target.tanggal_target,
-                        min_target: response.data.target.min_target || MIN_TARGET,
-                        max_target: response.data.target.max_target || 1000000,
-                        total_target: response.data.target.total_target
-                    });
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching target:', error);
-                setLoading(false);
+useEffect(() => {
+    const fetchTarget = async () => {
+        try {
+            const response = await axios.get('/apps/targets/current');
+            if (response.data.target) {
+                setExistingTarget(response.data.target);
+                // Format tanggal untuk input date
+                const formattedDate = response.data.target.tanggal_target ? 
+                    new Date(response.data.target.tanggal_target).toISOString().split('T')[0] : '';
+                
+                setData({
+                    judul_target: response.data.target.judul_target,
+                    tanggal_target: formattedDate,
+                    min_target: response.data.target.min_target || MIN_TARGET,
+                    max_target: response.data.target.max_target || 1000000,
+                    total_target: response.data.target.total_target || MIN_TARGET
+                });
+            } else {
+                setData(prev => ({
+                    ...prev,
+                    total_target: MIN_TARGET
+                }));
             }
-        };
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching target:', error);
+            setLoading(false);
+        }
+    };
 
-        fetchTarget();
-    }, []);
+    fetchTarget();
+}, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -66,7 +75,7 @@ export default function Edit() {
                 onSuccess: () => {
                     toast.dismiss(loadingToast);
                     toast.success('Target berhasil diperbarui!');
-                    window.location.href = route('apps.user.target');
+                    router.visit(route('apps.user.dashboard'));
                 },
                 onError: () => {
                     toast.dismiss(loadingToast);
@@ -78,7 +87,7 @@ export default function Edit() {
                 onSuccess: () => {
                     toast.dismiss(loadingToast);
                     toast.success('Target berhasil dibuat!');
-                    window.location.href = route('apps.user.target');
+                    router.visit(route('apps.user.dashboard'));
                 },
                 onError: () => {
                     toast.dismiss(loadingToast);
@@ -108,7 +117,7 @@ export default function Edit() {
     const calculateProgress = () => {
         const range = data.max_target - data.min_target;
         const current = data.total_target - data.min_target;
-        return (current / range) * 100;
+        return Math.max(0, Math.min(100, (current / range) * 100));
     };
 
     return (
@@ -120,41 +129,37 @@ export default function Edit() {
             <div className="min-h-screen bg-white dark:bg-gray-950">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
                     <div className="flex items-center gap-4 mb-6">
-                        <Link 
-                            href={route('apps.user.target')} 
-                            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-                        >
-                            <IconChevronLeft size={24} strokeWidth={1.5} />
-                        </Link>
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                            {existingTarget ? 'Edit target omzetmu' : 'Tentukan target omzetmu'}
+                            {existingTarget ? 'Sesuaikan target omzetmu' : 'Tentukan target omzetmu'}
                         </h1>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <Input
                             type="text"
-                            label="Judul Target/Goal"
+                            label={<span className="text-black text-base font-medium">Judul Target/Goal</span>}
                             placeholder="e.g Holiday"
                             value={data.judul_target}
                             onChange={e => setData('judul_target', e.target.value)}
                             errors={errors.judul_target}
+                            className="border border-[#58177F] w-full h-[42px]"
                         />
                         <Input
                             type="date"
-                            label="Timeline Target"
+                            label={<span className="text-black text-base font-medium">Timeline Target</span>}
                             placeholder="e.g 30 Nov 25"
                             value={data.tanggal_target}
                             onChange={e => setData('tanggal_target', e.target.value)}
                             errors={errors.tanggal_target}
-                            icon={<IconCalendar size={20} />}
+                            icon={<IconCalendar size={26} />}
+                            className="border border-[#58177F] w-full h-[42px]"
                         />
                         
-                        <div className="space-y-4">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Target Omzet</label>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Min</label>
+                        <div className="space-y-2">
+                            <label className="block text-md font-medium text-black">Target Omzet</label>
+                            <div className="flex justify-between gap-4">
+                                <div className="w-full max-w-[48%]">
+                                    <label className="block text-sm text-black mb-1">Min</label>
                                     <Input
                                         type="text"
                                         placeholder="e.g Rp 100.000"
@@ -168,10 +173,11 @@ export default function Edit() {
                                             }));
                                         }}
                                         errors={errors.min_target}
+                                        className="border border-[#58177F] w-full h-[40px]"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Maks</label>
+                                <div className="w-full max-w-[48%]">
+                                    <label className="block text-sm text-black mb-1">Maks</label>
                                     <Input
                                         type="text"
                                         placeholder="e.g Rp 1.000.000"
@@ -185,55 +191,65 @@ export default function Edit() {
                                             }));
                                         }}
                                         errors={errors.max_target}
+                                        className="border border-[#58177F] w-full h-[40px]"
                                     />
-                                </div>
-                            </div>
-                            
-                            <div className="mt-6">
-                                <div className="bg-purple-100 text-purple-600 text-sm px-3 py-1 rounded-full inline-block dark:bg-purple-900 dark:text-purple-300">
-                                    {formatRupiah(data.total_target)}
-                                </div>
-                                <div className="relative mt-2">
-                                    <div className="h-4 bg-purple-100 dark:bg-purple-900/50 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-purple-500 rounded-full transition-all duration-150"
-                                            style={{ width: `${calculateProgress()}%` }}
-                                        />
-                                    </div>
-                                    <div 
-                                        className="absolute top-1/2 -translate-y-1/2 w-3 h-8 bg-purple-600 dark:bg-purple-400 rounded-full transition-all duration-150 -translate-x-1/2 cursor-pointer"
-                                        style={{ left: `${calculateProgress()}%` }}
-                                    />
-                                    <input
-                                        type="range"
-                                        min={data.min_target}
-                                        max={data.max_target}
-                                        step={1000}
-                                        value={data.total_target}
-                                        onChange={e => handleTargetChange(e.target.value)}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    />
-                                </div>
-                                <div className="flex justify-between mt-1">
-                                    <span className="text-sm text-gray-500 dark:text-gray-400">{formatRupiah(data.min_target)}</span>
-                                    <span className="text-sm text-gray-500 dark:text-gray-400">{formatRupiah(data.max_target)}</span>
                                 </div>
                             </div>
                         </div>
 
+                        <div className="mt-30">
+                            <div className="relative">
+                                <div 
+                                    className="bg-[#D4A8EF] text-white text-sm px-3 py-1 rounded-full inline-block dark:bg-purple-900 dark:text-purple-300 absolute z-10 transform -translate-x-1/2"
+                                    style={{ 
+                                        left: `${calculateProgress()}%`,
+                                        top: '-34px'
+                                    }}
+                                >
+                                    {formatRupiah(data.total_target)}
+                                </div>
+                                    <div className="h-[34px] bg-purple-100 dark:bg-purple-900/50 rounded-full overflow-hidden">
+                                        <div 
+                                        className="h-full bg-[#AA51DF] rounded-lg transition-all duration-150"
+                                        style={{ width: `${calculateProgress()}%` }}
+                                    />
+                                </div>
+                                <div 
+                                    className="absolute top-1/2 -translate-y-1/2 w-[17px] h-[43px] bg-[#AA51DF] dark:bg-[#AA51DF] rounded-full transition-all duration-150 -translate-x-1/2 cursor-pointer"
+                                    style={{ 
+                                        left: `${calculateProgress()}%`,
+                                        top: '50%'
+                                    }}
+                                />
+                                <input
+                                    type="range"
+                                    min={data.min_target}
+                                    max={data.max_target}
+                                    step={1000}
+                                    value={data.total_target}
+                                    onChange={e => handleTargetChange(e.target.value)}
+                                    className="absolute inset-0 w-full h-[34px] opacity-0 cursor-pointer"
+                                />
+                            </div>
+                            <div className="flex justify-between mt-6">
+                                <span className="text-sm text-gray-700 dark:text-gray-400">{formatRupiah(data.min_target)}</span>
+                                <span className="text-sm text-gray-700 dark:text-gray-400">{formatRupiah(data.max_target)}</span>
+                            </div>
+                        </div>
+
                         {/* Action Buttons */}
-                        <div className="flex space-x-2 mt-8">
+                        <div className="flex justify-end space-x-2 mt-8">
                             <button
                                 type="button"
                                 onClick={handleCancel}
-                                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200"
+                                className="px-8 h-[40px] bg-white border border-[#AA51DF] text-black rounded-md transition-colors duration-200 hover:bg-gray-50 dark:bg-white dark:hover:bg-gray-50 dark:text-black"
                             >
-                                Batalkan
+                                Batal
                             </button>
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600"
+                                className="px-6 h-[40px] bg-[#AA51DF] hover:bg-[#9539D2] text-white rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-[#AA51DF] dark:hover:bg-[#9539D2]"
                             >
                                 {existingTarget ? 'Perbarui' : 'Simpan'}
                             </button>

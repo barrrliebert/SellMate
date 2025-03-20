@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Product;
+use App\Models\Video;
+use App\Models\Article;
 
 class UserDashboardController extends Controller
 {
@@ -60,5 +62,45 @@ class UserDashboardController extends Controller
     public function editTarget()
     {
         return inertia('Apps/UserDashboard/Target/Edit');
+    }
+
+    /**
+     * Display video page
+     */
+    public function video()
+    {
+        return Inertia::render('Apps/UserDashboard/Video/Index', [
+            'videos' => Video::latest()->get()
+        ]);
+    }
+
+    public function showVideo(Video $video)
+    {
+        // Increment view count
+        $video->increment('views');
+
+        return Inertia::render('Apps/UserDashboard/Video/Show', [
+            'video' => $video
+        ]);
+    }
+
+    /**
+     * Display article page
+     */
+    public function article()
+    {
+        return Inertia::render('Apps/UserDashboard/Article/Index', [
+            'articles' => Article::latest()->get()
+        ]);
+    }
+
+    /**
+     * Display article detail page
+     */
+    public function showArticle(Article $article)
+    {
+        return Inertia::render('Apps/UserDashboard/Article/Show', [
+            'article' => $article
+        ]);
     }
 } 
