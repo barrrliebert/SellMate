@@ -45,33 +45,36 @@ export default function Index({ products }) {
         <>
             <Head title="Products" />
 
-            <div className="flex justify-between items-center">
-                <div className="mx-6">
-                    <h1 className="text-5xl mb-3 font-bold text-black">
-                        Katalog Produk
-                    </h1>
-                    <p className="text-xl mb-4 text-gray-600">
-                        Kelola produk unggulan tefa dengan mudah
-                    </p>
-                </div>
+   {/* Header Katalog Produk */}
+   <div className="mx-6 flex flex-col">
+    {/* Bagian Judul */}
+    <div className="mb-2">
+        <h1 className="text-5xl font-bold text-black">
+            Katalog Produk
+        </h1>
+        <p className="text-xl text-gray-600">
+            Kelola produk unggulan tefa dengan mudah
+        </p>
+    </div>
 
-                {hasAnyPermission(["products-create"]) && (
-                   <div className="mt-6">
-                     <Link
-                        href="/apps/products/create"
-                        className="bg-purple-400 text-white text-sm px-4 py-2 rounded-lg hover:bg-purple-500 transition"
-                    >
-                        Tambah Produk/Jasa
-                    </Link>
-                   </div>
-                )}
-            </div>
+    {/* Tombol Tambah Produk */}
+    {hasAnyPermission(["products-create"]) && (
+        <Link
+            href="/apps/products/create"
+            className="bg-purple-500 text-white text-lg px-6 py-3 rounded-full hover:bg-purple-600 transition self-end"
+        >
+            Tambah Produk
+        </Link>
+    )}
+</div>
 
+            {/* Daftar Produk */}
             <div className="rounded-lg p-6 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.data.map((product) => (
                         <div key={product.id} className="relative">
-                            <div className="bg-white border border-purple-300  rounded-2xl p-4  flex flex-col">
+                            <div className="bg-white border border-purple-300 rounded-2xl p-4 flex flex-col">
+                                
                                 {/* Gambar Produk */}
                                 <div className="mb-4 rounded-xl overflow-hidden w-full h-56">
                                     {product.foto_produk ? (
@@ -95,13 +98,7 @@ export default function Index({ products }) {
                                     {product.nama_produk}
                                 </h3>
 
-                                <span
-                                    className={` py-1 rounded-full text-xs font-semibold w-fit mb-2 ${
-                                        product.kategori === "produk"
-                                            ? " text-gray-700"
-                                            : " text-gray-700"
-                                    }`}
-                                >
+                                <span className="text-sm text-gray-700 mb-2">
                                     {product.kategori}
                                 </span>
 
@@ -132,7 +129,7 @@ export default function Index({ products }) {
                                             onClick={() =>
                                                 handleDelete(product.id)
                                             }
-                                            className=" text-red-600 p-2 rounded-lg hover:text-white hover:bg-red-600 transition transform hover:scale-105"
+                                            className="text-red-600 p-2 rounded-lg hover:text-white hover:bg-red-600 transition transform hover:scale-105"
                                         >
                                             <IconTrash size={23} />
                                         </button>
@@ -140,7 +137,7 @@ export default function Index({ products }) {
                                     {hasAnyPermission(["products-update"]) && (
                                         <Link
                                             href={`/apps/products/${product.id}/edit`}
-                                            className=" text-gray-900 p-2 rounded-lg hover:bg-yellow-600 transition transform hover:scale-105"
+                                            className="text-gray-900 p-2 rounded-lg hover:bg-yellow-600 transition transform hover:scale-105"
                                         >
                                             <IconEdit size={23} />
                                         </Link>
