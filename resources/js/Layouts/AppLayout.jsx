@@ -7,15 +7,19 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import SpeedDial from '@/Components/SpeedDial';
 
 export default function AppLayout({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     // destruct darkMode and themeSwitcher from context
     const {darkMode, themeSwitcher } = useTheme();
+    
+    // Get user info from usePage
+    const { auth } = usePage().props;
 
-   // define state sidebarOpen
+    // define state sidebarOpen
     const [sidebarOpen, setSidebarOpen] = useState(
         localStorage.getItem('sidebarOpen') === 'true'
     );
@@ -27,16 +31,34 @@ export default function AppLayout({ user, header, children }) {
 
     // define function toggleSidebar
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+    
+    // Check if user has users-access role
+    const isUserAccess = auth.user.roles.some(role => role.name === 'users-access');
 
     return (
         <main>
             <div className='min-h-screen flex overflow-y-auto'>
-                <Sidebar sidebarOpen={sidebarOpen}/>
                 <div className='flex-1 flex-col overflow-y-auto h-screen'>
                     <Navbar toggleSidebar={toggleSidebar} themeSwitcher={themeSwitcher} darkMode={darkMode} />
-                    <div className='w-full md:py-8 md:px-6 min-h-screen overflow-y-auto md:mb-0 text-white bg-white lg:bg-transparent dark:bg-gray-950 dark:text-gray-100'>
+                    <div className='w-full md:py-8 md:px-6 min-h-screen overflow-y-auto md:mb-0 text-white bg-white dark:bg-gray-950 dark:text-gray-100'>
                         <Toaster position='top-right'/>
-                        {children}
+                        
+                        {/* Main content area with speed dial on medium screens and above */}
+                        <div className="flex flex-col md:flex-row">
+                            {/* SpeedDial visible only on medium screens and above */}
+                            <div className="hidden md:block md:sticky md:top-0 md:self-start md:mr-10 ml-6 ">
+                                <SpeedDial 
+                                    isUserAccess={isUserAccess} 
+                                    isOpenByDefault={true} 
+                                    isMediumScreen={true}
+                                />
+                            </div>
+                            
+                            {/* Main content */}
+                            <div className="flex-1">
+                                {children}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

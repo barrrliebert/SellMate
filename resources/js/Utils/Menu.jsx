@@ -15,7 +15,7 @@ export default function Menu() {
     const menuNavigation = [
         {
             title: 'Overview',
-            permissions: true, // Always show for all users
+            permissions: true,
             details: [
                 {
                     title: 'Dashboard',
@@ -24,7 +24,7 @@ export default function Menu() {
                         ? url === '/apps/user-dashboard'
                         : url === '/apps/dashboard',
                     icon: <IconLayout2 size={20} strokeWidth={1.5}/>,
-                    permissions: true, // Always show for all users
+                    permissions: true,
                 }
             ]
         },

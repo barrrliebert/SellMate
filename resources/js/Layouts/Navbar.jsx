@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { usePage } from '@inertiajs/react';
-import { IconAlignLeft, IconMoon, IconSun } from '@tabler/icons-react'
+import { IconMoon, IconSun } from '@tabler/icons-react'
 import AuthDropdown from '@/Components/AuthDropdown';
 import Menu from '@/Utils/Menu';
-import Notification from '@/Components/Notification';
 
-export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
+export default function Navbar({ themeSwitcher, darkMode }) {
     // destruct auth from props
     const { auth } = usePage().props;
 
@@ -16,6 +15,9 @@ export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
     const links = menuNavigation.flatMap((item) => item.details);
     const filter_sublinks = links.filter((item) => item.hasOwnProperty('subdetails'));
     const sublinks = filter_sublinks.flatMap((item) => item.subdetails);
+
+    // define is user access
+    const isUserAccess = auth.user.roles.some(role => role.name === 'users-access');
 
     // define state isMobile
     const [isMobile, setIsMobile] = useState(false);
@@ -40,37 +42,14 @@ export default function Navbar({ toggleSidebar, themeSwitcher, darkMode }) {
     })
 
     return (
-        <div className={`flex justify-between items-center min-w-full sticky top-0 z-20 h-16  md:bg-white  dark:md:bg-gray-950 ${auth.user.roles.some(role => role.name === 'users-access') ? 'bg-gradient-to-r from-[#EDA375] to-[#D4A8EF]' : 'bg-white dark:bg-gray-950'} md:bg-none px-4 md:px-6`}>
-            <div className='flex items-center gap-4'>
-                {!isMobile && (
-                    <button className='text-gray-700 dark:text-gray-400' onClick={toggleSidebar}>
-                        <IconAlignLeft size={18} strokeWidth={1.5}/>
-                    </button>
-                )}
-                {!isMobile && (
-                    <div className='flex flex-row items-center gap-1 md:px-4 dark:border-gray-900'>
-                        {links.map((link, i) => (
-                            link.hasOwnProperty('subdetails') ?
-                            sublinks.map((sublink, x) => sublink.active === true && <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400' key={x}>{sublink.title}</span>)
-                            :
-                            link.active === true && <span className='font-semibold text-sm md:text-base text-gray-700 dark:text-gray-400 ' key={i}>{link.title}</span>
-                        ))}
-                    </div>
-                )}
-            </div>
-            <div className='flex items-center gap-4'>
-                {!isMobile && (
-                    <div className='flex flex-row items-center gap-1 border-r-2 border-double px-4 dark:border-gray-900'>
-                        <div className='flex flex-row gap-2'>
-                            <button className='p-2 rounded-md text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-900' onClick={themeSwitcher}>
-                               {darkMode ? <IconSun strokeWidth={1.5} size={18}/> : <IconMoon strokeWidth={1.5} size={18}/> }
-                            </button>
-                            <Notification/>
-                        </div>
-                    </div>
-                )}
-                <AuthDropdown auth={auth} isMobile={isMobile} toggleSidebar={toggleSidebar}/>
-            </div>
+        <div className={`flex justify-between items-center w-full sticky top-0 z-20 h-16 md:rounded-b-3xl ${isUserAccess ? 'bg-gradient-to-r from-[#EDA375] to-[#D4A8EF]' : 'bg-[#BF7CE7]'} px-4 md:px-6`}>
+            <AuthDropdown 
+                auth={auth} 
+                isMobile={isMobile} 
+                isUserAccess={isUserAccess} 
+                themeSwitcher={themeSwitcher}
+                darkMode={darkMode}
+            />
         </div>
     )
 }

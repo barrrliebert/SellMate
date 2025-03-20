@@ -24,6 +24,15 @@ Route::get('/', function () {
     ]);
 });
 
+// Admin route - public access
+Route::get('/admin', function() {
+    return Inertia::render('Apps/Admin/Index');
+})->name('admin');
+
+Route::get('/admin/login', function() {
+    return Inertia::render('Apps/Admin/Login');
+})->name('admin.login');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
