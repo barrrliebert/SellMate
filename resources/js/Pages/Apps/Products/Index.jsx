@@ -61,7 +61,7 @@ export default function Index({ products }) {
     {hasAnyPermission(["products-create"]) && (
         <Link
             href="/apps/products/create"
-            className="bg-purple-500 text-white text-lg px-6 py-3 rounded-full hover:bg-purple-600 transition self-end"
+            className="bg-purple-300 text-white text-lg px-7 py-3 rounded-full hover:bg-purple-400 transition self-end"
         >
             Tambah Produk
         </Link>

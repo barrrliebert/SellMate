@@ -15,6 +15,7 @@ export default withMT({
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                verdana: ['Verdana', ...defaultTheme.fontFamily.sans],
             },
         },
     },
