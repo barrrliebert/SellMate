@@ -7,13 +7,21 @@ export default function Detail({ type }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('date'); // 'date' or '1month', '3month', '6month', '12month'
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(() => {
+        const today = new Date();
+        const day = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+        return new Date(today.setDate(diff));
+    });
     const [sliderView, setSliderView] = useState('weekly'); // 'weekly' or 'monthly'
     const [showCalendar, setShowCalendar] = useState(false);
     const [isSliding, setIsSliding] = useState(false);
     const [touchStartX, setTouchStartX] = useState(0);
     const [touchEndX, setTouchEndX] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [perPage, setPerPage] = useState(7);
 
     // Define clickOutside ref
     const calendarRef = useRef(null);
@@ -33,7 +41,11 @@ export default function Detail({ type }) {
 
     useEffect(() => {
         fetchData();
-    }, [type, viewMode, selectedDate]);
+    }, [type, viewMode, selectedDate, currentPage]);
+
+    useEffect(() => {
+        setViewMode('week');
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -52,18 +64,17 @@ export default function Detail({ type }) {
         try {
             const params = {};
             
-            // Add different parameters based on view mode and type
-            if (type !== 'topOmzet') {  // Only add filter params for transactions and commissions
+            if (type === 'topOmzet') {
+                params.page = currentPage;
+                params.per_page = perPage;
+            } else if (type !== 'topOmzet') {
                 if (viewMode === 'week') {
-                    // Get data for the whole week
                     params.filter_type = 'week';
                 } else if (viewMode === 'date') {
-                    // Get data from selected date to today
                     params.filter_type = 'custom';
                     params.start_date = selectedDate.toISOString().split('T')[0];
                     params.end_date = new Date().toISOString().split('T')[0];
                 } else if (viewMode.includes('month')) {
-                    // Get data for X months back
                     params.filter_type = 'custom';
                     const monthsBack = parseInt(viewMode);
                     const startDate = new Date();
@@ -75,9 +86,15 @@ export default function Detail({ type }) {
             
             const response = await axios.get(endpoints[type], { params });
             
-            setData(type === 'topOmzet' ? response.data.top_users : 
-                   type === 'transactions' ? response.data.omzets : 
-                   response.data.commissions);
+            if (type === 'topOmzet') {
+                const { current_page, data: pageData, total, per_page } = response.data.top_users;
+                setData(pageData);
+                setTotalPages(Math.ceil(total / per_page));
+                setCurrentPage(current_page);
+                setPerPage(per_page);
+            } else {
+                setData(type === 'transactions' ? response.data.omzets : response.data.commissions);
+            }
             setLoading(false);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -287,7 +304,7 @@ export default function Detail({ type }) {
         if (type === 'topOmzet') {
             return (
                 <div className="px-4">
-                    <div className="grid grid-cols-3 items-center px-4 py-3">
+                    <div className="grid grid-cols-3 items-center px-3 py-3">
                         <div className="text-center">
                             <span className="text-sm font-medium text-gray-900">
                                 Nama
@@ -458,18 +475,142 @@ export default function Detail({ type }) {
         };
     }, [isDragging]);
 
+    // Add pagination controls
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
+
+    const renderPaginationNumbers = (currentPage, totalPages, onPageChange) => {
+        // Don't render pagination if there's only 1 page
+        if (totalPages <= 1) return null;
+        
+        const pages = [];
+
+        // Left Arrow
+        pages.push(
+            <button
+                key="prev"
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="w-5 h-5 flex items-center justify-center text-[10px] text-gray-500 disabled:text-gray-300"
+            >
+                ←
+            </button>
+        );
+
+        // First page
+        pages.push(
+            <button
+                key={1}
+                onClick={() => onPageChange(1)}
+                className={`w-5 h-5 flex items-center justify-center text-[10px] ${
+                    currentPage === 1 
+                    ? 'text-[#58177F] font-medium' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+                1
+            </button>
+        );
+
+        let startPage = Math.max(2, currentPage - 1);
+        let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+        // Add ellipsis after first page if needed
+        if (startPage > 2) {
+            pages.push(<span key="ellipsis1" className="w-3 text-center text-[10px] text-gray-500">...</span>);
+        }
+
+        // Add middle pages
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <button
+                    key={i}
+                    onClick={() => onPageChange(i)}
+                    className={`w-5 h-5 flex items-center justify-center text-[10px] ${
+                        currentPage === i 
+                        ? 'text-[#58177F] font-medium' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        // Add ellipsis before last page if needed
+        if (endPage < totalPages - 1) {
+            pages.push(<span key="ellipsis2" className="w-3 text-center text-[10px] text-gray-500">...</span>);
+        }
+
+        // Last page
+        if (totalPages > 1) {
+            pages.push(
+                <button
+                    key={totalPages}
+                    onClick={() => onPageChange(totalPages)}
+                    className={`w-5 h-5 flex items-center justify-center text-[10px] ${
+                        currentPage === totalPages 
+                        ? 'text-[#58177F] font-medium' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {totalPages}
+                </button>
+            );
+        }
+
+        // Right Arrow
+        pages.push(
+            <button
+                key="next"
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="w-5 h-5 flex items-center justify-center text-[10px] text-gray-500 disabled:text-gray-300"
+            >
+                →
+            </button>
+        );
+
+        return pages;
+    };
+
+    // Replace the existing renderPagination function with this one
+    const renderPagination = () => {
+        if (type !== 'topOmzet' || totalPages <= 1) return null;
+
+        return (
+            <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex justify-end items-center space-x-[2px]">
+                    {renderPaginationNumbers(
+                        currentPage,
+                        totalPages,
+                        handlePageChange
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     const renderDateNavigation = () => {
         if (sliderView === 'weekly') {
+            const formatDateButton = (date) => {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = date.toLocaleDateString('id-ID', { month: 'short' });
+                const year = date.getFullYear().toString().slice(-2);
+                const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+                return `${day} ${capitalizedMonth} ${year}`;
+            };
+
             return (
                 <div className="fixed bottom-0 left-0 right-0">
                     <div className="w-full relative">
-                        {/* Background Container */}
                         <div 
                             className="absolute inset-x-0 bottom-0 h-[80px] -z-10 w-full" 
                             style={{ backgroundColor: '#F9E0D1' }}
                         />
-
-                        {/* Sliding Container */}
                         <div 
                             ref={sliderRef}
                             className="overflow-hidden pt-6"
@@ -487,7 +628,7 @@ export default function Detail({ type }) {
                                     isSliding ? 'transform translate-x-[-100%]' : ''
                                 }`}
                             >
-                                {/* First Slide - Date/Today */}
+                                {/* First Slide - Date/Week */}
                                 <div className="w-full flex-shrink-0">
                                     <div className="bg-white rounded-full flex items-center h-[30px] relative border border-[#EDA375] max-w-[382px] mx-auto overflow-hidden">
                                         <button 
@@ -497,7 +638,7 @@ export default function Detail({ type }) {
                                             }}
                                             className="flex-1 h-full flex items-center justify-center text-sm text-gray-800"
                                         >
-                                            {formatDate(selectedDate)}
+                                            {formatDateButton(selectedDate)}
                                         </button>
                                         <div className="h-full w-[30px] bg-[#F3BA9B]"></div>
                                         <button 
@@ -580,7 +721,7 @@ export default function Detail({ type }) {
                                         setViewMode('date');
                                         setShowCalendar(false);
                                     }}
-                                    max={new Date().toISOString().split('T')[0]} // Can't select future dates
+                                    max={new Date().toISOString().split('T')[0]}
                                     className="p-2 border rounded-lg"
                                 />
                             </div>
@@ -634,8 +775,9 @@ export default function Detail({ type }) {
                 </div>
 
                 {/* Content */}
-                <div className="pb-24">
+                <div className={`${type === 'topOmzet' ? 'pb-4' : 'pb-24'}`}>
                     {renderContent()}
+                    {renderPagination()}
                 </div>
 
                 {/* Footer Navigation - Only show for transactions and commissions */}

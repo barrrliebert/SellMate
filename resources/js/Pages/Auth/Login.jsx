@@ -84,11 +84,6 @@ export default function Login({ status, canResetPassword }) {
                                         {errors.email}
                                     </div>
                                 )}
-                                {errors.email && (
-                                    <div className="mt-2 text-sm text-red-600">
-                                        {errors.email}
-                                    </div>
-                                )}
                             </div>
 
                             <div>

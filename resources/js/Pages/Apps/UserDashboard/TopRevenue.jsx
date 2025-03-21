@@ -18,8 +18,13 @@ export default function TopRevenue() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('/apps/omzets/top-omzet');
-                setTopUsers(response.data.top_users.slice(0, 3));
+                const response = await axios.get('/apps/omzets/top-omzet', {
+                    params: {
+                        per_page: 3,
+                        page: 1
+                    }
+                });
+                setTopUsers(response.data.top_users.data);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);

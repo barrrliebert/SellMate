@@ -8,6 +8,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\OmzetRequest;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 
 class OmzetController extends Controller
 {
@@ -34,7 +39,7 @@ class OmzetController extends Controller
     public function getTransactionRecords(Request $request)
     {
         // Check if user is admin
-        $isAdmin = auth()->user()->hasRole('super-admin');
+        $isAdmin = Gate::allows('dashboard-data');
 
         $query = Omzet::with(['user', 'product'])
             ->latest();
@@ -81,33 +86,51 @@ class OmzetController extends Controller
             }
         }
 
-        $omzets = $query->get()
-            ->map(function($omzet) use ($isAdmin) {
-                $data = [
+        if ($isAdmin) {
+            // For admin view - use pagination
+            $perPage = $request->get('per_page', 10);
+            $omzets = $query->paginate($perPage);
+
+            $formattedData = collect($omzets->items())->map(function($omzet) {
+                return [
                     'id' => $omzet->id,
                     'tanggal' => $omzet->tanggal,
                     'formatted_omzet' => $omzet->formatted_omzet,
-                    'total_omzet' => $omzet->total_omzet
-                ];
-
-                if (!$isAdmin) {
-                    $data['product'] = [
-                        'nama_produk' => $omzet->product->nama_produk,
-                        'foto_produk' => $omzet->product->foto_produk
-                    ];
-                } else {
-                    $data['user'] = [
+                    'total_omzet' => $omzet->total_omzet,
+                    'user' => [
                         'name' => $omzet->user->name,
                         'major' => $omzet->user->major
-                    ];
-                }
-
-                return $data;
+                    ]
+                ];
             });
 
-        return response()->json([
-            'omzets' => $omzets
-        ]);
+            return response()->json([
+                'omzets' => [
+                    'current_page' => $omzets->currentPage(),
+                    'data' => $formattedData,
+                    'per_page' => $omzets->perPage(),
+                    'total' => $omzets->total()
+                ]
+            ]);
+        } else {
+            // For user view - return all data
+            $omzets = $query->get()->map(function($omzet) {
+                return [
+                    'id' => $omzet->id,
+                    'tanggal' => $omzet->tanggal,
+                    'formatted_omzet' => $omzet->formatted_omzet,
+                    'total_omzet' => $omzet->total_omzet,
+                    'product' => [
+                        'nama_produk' => $omzet->product->nama_produk,
+                        'foto_produk' => $omzet->product->foto_produk
+                    ]
+                ];
+            });
+
+            return response()->json([
+                'omzets' => $omzets
+            ]);
+        }
     }
 
     /**
@@ -169,10 +192,13 @@ class OmzetController extends Controller
      */
     public function getTopOmzet(Request $request)
     {
+        // Check if user is admin
+        $isAdmin = Gate::allows('dashboard-data');
+
         $query = Omzet::with(['user', 'product']);
 
         // Add search functionality
-        if ($request->has('search')) {
+        if ($request->has('search') && $isAdmin) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%');
@@ -209,9 +235,22 @@ class OmzetController extends Controller
                     $query->whereMonth('tanggal', $now->month)
                          ->whereYear('tanggal', $now->year);
             }
+        } else {
+            // Default to current month if no filter_type is provided
+            $now = now();
+            $query->whereMonth('tanggal', $now->month)
+                 ->whereYear('tanggal', $now->year);
         }
 
-        $topUsers = $query->get()
+        // Get users with roles-access
+        $userIds = User::whereHas('roles', function($q) {
+            $q->where('name', 'users-access');
+        })->pluck('id');
+
+        // Add user role filter
+        $query->whereIn('user_id', $userIds);
+
+        $allUsers = $query->get()
             ->groupBy('user_id')
             ->map(function ($omzets) {
                 $totalOmzet = $omzets->sum('total_omzet');
@@ -227,8 +266,20 @@ class OmzetController extends Controller
             ->sortByDesc('total_omzet')
             ->values();
 
+        // Always use pagination
+        $perPage = $request->get('per_page', 7);
+        $page = $request->get('page', 1);
+        $total = $allUsers->count();
+        $offset = ($page - 1) * $perPage;
+        $items = $allUsers->slice($offset, $perPage)->values();
+
         return response()->json([
-            'top_users' => $topUsers
+            'top_users' => [
+                'current_page' => (int)$page,
+                'data' => $items,
+                'per_page' => (int)$perPage,
+                'total' => $total
+            ]
         ]);
     }
 
@@ -384,7 +435,7 @@ class OmzetController extends Controller
         $transactions = $query->latest()->get();
 
         // Generate PDF using DomPDF
-        $pdf = \PDF::loadView('pdf.transactions', [
+        $pdf = Pdf::loadView('pdf.transactions', [
             'transactions' => $transactions,
             'filter' => $filter,
             'dateRange' => $this->getDateRangeText($filter, $currentTime, $request),

@@ -9,31 +9,31 @@ import axios from 'axios';
 import { Menu } from '@headlessui/react';
 
 export default function Dashboard({ auth }) {
-    const [totalOmzet, setTotalOmzet] = useState(0);
     const [totalProducts, setTotalProducts] = useState(0);
     const [totalUsers, setTotalUsers] = useState(0);
-    const [topUsers, setTopUsers] = useState([]);
-    const [transactions, setTransactions] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [exportLoading, setExportLoading] = useState(false);
     const [searchTopUsers, setSearchTopUsers] = useState('');
     const [searchTransactions, setSearchTransactions] = useState('');
-    const [dateFilter, setDateFilter] = useState({
-        topUsers: {
-            type: 'all',  // all, today, week, month, custom
-            startDate: '',
-            endDate: ''
-        },
-        transactions: {
-            type: 'all',
-            startDate: '',
-            endDate: ''
-        },
-        export: {
-            startDate: '',
-            endDate: ''
-        }
+    const [topUsers, setTopUsers] = useState({ data: [], total: 0, per_page: 6, current_page: 1 });
+    const [transactions, setTransactions] = useState({ data: [], total: 0, per_page: 10, current_page: 1 });
+    const [filters, setFilters] = useState({
+        topUsers: 'month',
+        transactions: 'month'
     });
+    const [dates, setDates] = useState({
+        topUsers: { startDate: null, endDate: null },
+        transactions: { startDate: null, endDate: null }
+    });
+    const [currentPage, setCurrentPage] = useState({
+        topUsers: 1,
+        transactions: 1
+    });
+    const [tempDates, setTempDates] = useState({
+        topUsers: { startDate: null, endDate: null },
+        transactions: { startDate: null, endDate: null }
+    });
+    const [totalOmzet, setTotalOmzet] = useState('Rp 0');
 
     // Filter options for export
     const filterOptions = [
@@ -46,7 +46,7 @@ export default function Dashboard({ auth }) {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [currentPage, searchTopUsers, searchTransactions]);
 
     // Watch for search changes
     useEffect(() => {
@@ -60,23 +60,24 @@ export default function Dashboard({ auth }) {
     // Add new useEffect to watch filter changes
     useEffect(() => {
         fetchData(searchTopUsers, searchTransactions);
-    }, [dateFilter.topUsers.type, dateFilter.transactions.type]);
+    }, [filters.topUsers, filters.transactions]);
 
     const handleFilterChange = (table, type) => {
-        setDateFilter(prev => ({
-            ...prev,
-            [table]: { 
-                ...prev[table], 
-                type,
-                // Reset dates when changing filter type
-                startDate: type === 'custom' ? prev[table].startDate : '',
-                endDate: type === 'custom' ? prev[table].endDate : ''
-            }
-        }));
+        if (type !== 'custom') {
+            setFilters(prev => ({
+                ...prev,
+                [table]: type
+            }));
+            // Langsung fetch data untuk filter non-custom
+            fetchData(searchTopUsers, searchTransactions, {
+                ...filters,
+                [table]: type
+            }, dates);
+        }
     };
 
     const handleDateChange = (table, dateType, value) => {
-        setDateFilter(prev => ({
+        setTempDates(prev => ({
             ...prev,
             [table]: { 
                 ...prev[table], 
@@ -85,7 +86,30 @@ export default function Dashboard({ auth }) {
         }));
     };
 
-    const fetchData = async (topUsersSearch = '', transactionsSearch = '') => {
+    const handleCustomFilter = (table) => {
+        const customDates = tempDates[table];
+        if (customDates.startDate && customDates.endDate) {
+            // Update both filters and dates
+            setFilters(prev => ({
+                ...prev,
+                [table]: 'custom'
+            }));
+            setDates(prev => ({
+                ...prev,
+                [table]: customDates
+            }));
+            // Fetch data with new filter and dates
+            fetchData(searchTopUsers, searchTransactions, {
+                ...filters,
+                [table]: 'custom'
+            }, {
+                ...dates,
+                [table]: customDates
+            });
+        }
+    };
+
+    const fetchData = async (topUsersSearch = '', transactionsSearch = '', currentFilters = filters, currentDates = dates) => {
         try {
             setLoading(true);
             const [omzetRes, productsRes, usersRes, topOmzetRes, transactionsRes] = await Promise.all([
@@ -95,29 +119,48 @@ export default function Dashboard({ auth }) {
                 axios.get('/apps/omzets/top-omzet', { 
                     params: { 
                         search: topUsersSearch,
-                        filter_type: dateFilter.topUsers.type,
-                        start_date: dateFilter.topUsers.startDate,
-                        end_date: dateFilter.topUsers.endDate
+                        filter_type: currentFilters.topUsers,
+                        start_date: currentDates.topUsers.startDate,
+                        end_date: currentDates.topUsers.endDate,
+                        page: currentPage.topUsers,
+                        per_page: 6
                     } 
                 }),
                 axios.get('/apps/omzets/transaction-records', { 
                     params: { 
                         search: transactionsSearch,
-                        filter_type: dateFilter.transactions.type,
-                        start_date: dateFilter.transactions.startDate,
-                        end_date: dateFilter.transactions.endDate
+                        filter_type: currentFilters.transactions,
+                        start_date: currentDates.transactions.startDate,
+                        end_date: currentDates.transactions.endDate,
+                        page: currentPage.transactions,
+                        per_page: transactions.per_page
                     } 
                 })
             ]);
             
-            setTotalOmzet(omzetRes.data.total_omzet);
-            setTotalProducts(productsRes.data.total);
-            setTotalUsers(usersRes.data.total);
-            setTopUsers(topOmzetRes.data.top_users);
-            setTransactions(transactionsRes.data.omzets);
-            setLoading(false);
+            setTotalOmzet(omzetRes.data?.total_omzet ?? 'Rp 0');
+            setTotalProducts(productsRes.data?.total ?? 0);
+            setTotalUsers(usersRes.data?.total ?? 0);
+            setTopUsers({
+                data: topOmzetRes.data?.top_users?.data ?? [],
+                total: topOmzetRes.data?.top_users?.total ?? 0,
+                per_page: topOmzetRes.data?.top_users?.per_page ?? 6,
+                current_page: topOmzetRes.data?.top_users?.current_page ?? 1
+            });
+            setTransactions({
+                data: transactionsRes.data?.omzets?.data ?? [],
+                total: transactionsRes.data?.omzets?.total ?? 0,
+                per_page: transactionsRes.data?.omzets?.per_page ?? 10,
+                current_page: transactionsRes.data?.omzets?.current_page ?? 1
+            });
         } catch (error) {
             console.error('Error fetching data:', error);
+            setTotalOmzet('Rp 0');
+            setTotalProducts(0);
+            setTotalUsers(0);
+            setTopUsers({ data: [], total: 0, per_page: 6, current_page: 1 });
+            setTransactions({ data: [], total: 0, per_page: 10, current_page: 1 });
+        } finally {
             setLoading(false);
         }
     };
@@ -128,8 +171,8 @@ export default function Dashboard({ auth }) {
             let params = { filter };
             
             if (filter === 'custom') {
-                params.start_date = dateFilter.export.startDate;
-                params.end_date = dateFilter.export.endDate;
+                params.start_date = dates.transactions.startDate;
+                params.end_date = dates.transactions.endDate;
             }
 
             const response = await axios.get('/apps/omzets/export-pdf', {
@@ -161,12 +204,6 @@ export default function Dashboard({ auth }) {
     };
 
     const FilterDropdown = ({ table, currentFilter, onFilterChange, onDateChange }) => {
-        const handleCustomFilter = () => {
-            if (currentFilter.startDate && currentFilter.endDate) {
-                onFilterChange('custom');
-            }
-        };
-
         return (
             <Menu as="div" className="relative text-gray-600">
                 <Menu.Button className={`inline-flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 ${currentFilter.type !== 'all' ? 'ring-2 ring-blue-500/30' : ''}`}>
@@ -177,9 +214,9 @@ export default function Dashboard({ auth }) {
                         {({ active }) => (
                             <button
                                 onClick={() => onFilterChange('all')}
-                                className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150
-                                    ${currentFilter.type === 'all' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}
-                                    ${active ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                                className={`w-full text-left px-4 py-2 text-sm ${
+                                    active ? 'bg-gray-100 dark:bg-gray-800' : ''
+                                }`}
                             >
                                 Semua
                             </button>
@@ -189,9 +226,9 @@ export default function Dashboard({ auth }) {
                         {({ active }) => (
                             <button
                                 onClick={() => onFilterChange('today')}
-                                className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150
-                                    ${currentFilter.type === 'today' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}
-                                    ${active ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                                className={`w-full text-left px-4 py-2 text-sm ${
+                                    active ? 'bg-gray-100 dark:bg-gray-800' : ''
+                                }`}
                             >
                                 Hari Ini
                             </button>
@@ -201,9 +238,9 @@ export default function Dashboard({ auth }) {
                         {({ active }) => (
                             <button
                                 onClick={() => onFilterChange('week')}
-                                className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150
-                                    ${currentFilter.type === 'week' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}
-                                    ${active ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                                className={`w-full text-left px-4 py-2 text-sm ${
+                                    active ? 'bg-gray-100 dark:bg-gray-800' : ''
+                                }`}
                             >
                                 Minggu Ini
                             </button>
@@ -213,9 +250,9 @@ export default function Dashboard({ auth }) {
                         {({ active }) => (
                             <button
                                 onClick={() => onFilterChange('month')}
-                                className={`w-full text-left px-4 py-2 text-sm transition-colors duration-150
-                                    ${currentFilter.type === 'month' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}
-                                    ${active ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                                className={`w-full text-left px-4 py-2 text-sm ${
+                                    active ? 'bg-gray-100 dark:bg-gray-800' : ''
+                                }`}
                             >
                                 Bulan Ini
                             </button>
@@ -226,23 +263,20 @@ export default function Dashboard({ auth }) {
                         <div className="space-y-2">
                             <input
                                 type="date"
-                                className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/70 focus:border-transparent"
-                                value={currentFilter.startDate}
+                                className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                                value={tempDates[table].startDate || ''}
                                 onChange={(e) => onDateChange('start', e.target.value)}
                             />
                             <input
                                 type="date"
-                                className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500/70 focus:border-transparent"
-                                value={currentFilter.endDate}
+                                className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
+                                value={tempDates[table].endDate || ''}
                                 onChange={(e) => onDateChange('end', e.target.value)}
                             />
                             <button
-                                onClick={handleCustomFilter}
-                                disabled={!currentFilter.startDate || !currentFilter.endDate}
-                                className={`w-full px-3 py-1.5 text-sm rounded-lg transition-all duration-200
-                                    ${currentFilter.type === 'custom' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'}
-                                    hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed
-                                    ${currentFilter.type === 'custom' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900' : ''}`}
+                                onClick={() => handleCustomFilter(table)}
+                                disabled={!tempDates[table].startDate || !tempDates[table].endDate}
+                                className="w-full px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Terapkan
                             </button>
@@ -288,19 +322,19 @@ export default function Dashboard({ auth }) {
                             <input
                                 type="date"
                                 className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700"
-                                value={dateFilter.export.startDate}
-                                onChange={(e) => setDateFilter({
-                                    ...dateFilter,
-                                    export: { ...dateFilter.export, startDate: e.target.value }
+                                value={dates.transactions.startDate}
+                                onChange={(e) => setDates({
+                                    ...dates,
+                                    transactions: { ...dates.transactions, startDate: e.target.value }
                                 })}
                             />
                             <input
                                 type="date"
                                 className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700"
-                                value={dateFilter.export.endDate}
-                                onChange={(e) => setDateFilter({
-                                    ...dateFilter,
-                                    export: { ...dateFilter.export, endDate: e.target.value }
+                                value={dates.transactions.endDate}
+                                onChange={(e) => setDates({
+                                    ...dates,
+                                    transactions: { ...dates.transactions, endDate: e.target.value }
                                 })}
                             />
                             <button
@@ -316,6 +350,120 @@ export default function Dashboard({ auth }) {
         );
     };
 
+    const handlePageChange = (table, page) => {
+        setCurrentPage(prev => ({
+            ...prev,
+            [table]: page
+        }));
+    };
+
+    const formatDate = (dateString) => {
+        try {
+            return new Date(dateString).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit'
+            }).replace(/\./g, '/');
+        } catch (error) {
+            return '-';
+        }
+    };
+
+    const renderPaginationNumbers = (currentPage, totalPages, onPageChange) => {
+        // Don't render pagination if there's only 1 page
+        if (totalPages <= 1) return null;
+        
+        const pages = [];
+
+        // Left Arrow
+        pages.push(
+            <button
+                key="prev"
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="w-5 h-5 flex items-center justify-center text-[10px] text-gray-500 disabled:text-gray-300"
+            >
+                ←
+            </button>
+        );
+
+        // First page
+        pages.push(
+            <button
+                key={1}
+                onClick={() => onPageChange(1)}
+                className={`w-5 h-5 flex items-center justify-center text-[10px] ${
+                    currentPage === 1 
+                    ? 'text-[#58177F] font-medium' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+            >
+                1
+            </button>
+        );
+
+        let startPage = Math.max(2, currentPage - 1);
+        let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+        // Add ellipsis after first page if needed
+        if (startPage > 2) {
+            pages.push(<span key="ellipsis1" className="w-3 text-center text-[10px] text-gray-500">...</span>);
+        }
+
+        // Add middle pages
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <button
+                    key={i}
+                    onClick={() => onPageChange(i)}
+                    className={`w-5 h-5 flex items-center justify-center text-[10px] ${
+                        currentPage === i 
+                        ? 'text-[#58177F] font-medium' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {i}
+                </button>
+            );
+        }
+
+        // Add ellipsis before last page if needed
+        if (endPage < totalPages - 1) {
+            pages.push(<span key="ellipsis2" className="w-3 text-center text-[10px] text-gray-500">...</span>);
+        }
+
+        // Last page
+        if (totalPages > 1) {
+            pages.push(
+                <button
+                    key={totalPages}
+                    onClick={() => onPageChange(totalPages)}
+                    className={`w-5 h-5 flex items-center justify-center text-[10px] ${
+                        currentPage === totalPages 
+                        ? 'text-[#58177F] font-medium' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {totalPages}
+                </button>
+            );
+        }
+
+        // Right Arrow
+        pages.push(
+            <button
+                key="next"
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                className="w-5 h-5 flex items-center justify-center text-[10px] text-gray-500 disabled:text-gray-300"
+            >
+                →
+            </button>
+        );
+
+        return pages;
+    };
+
     return (
         <>
             <Head title='Dashboard'/>
@@ -324,11 +472,11 @@ export default function Dashboard({ auth }) {
             <div className='px-4 lg:px-0 mb-6 mt-6 md:mt-0 flex justify-between items-center'>
                 <div>
                     <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-200'>
-                        Dashboard
-                    </h1>
-                    <p className='text-gray-600 dark:text-gray-400 text-sm'>
-                        Tetap monitoring progress dan update aktivitas pendapatan Tefa
-                    </p>
+                    Dashboard
+                </h1>
+                <p className='text-gray-600 dark:text-gray-400 text-sm'>
+                    Tetap monitoring progress dan update aktivitas pendapatan Tefa
+                </p>
                 </div>
                 <Menu as="div" className="relative">
                     <Menu.Button 
@@ -363,19 +511,19 @@ export default function Dashboard({ auth }) {
                                 <input
                                     type="date"
                                     className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
-                                    value={dateFilter.export.startDate}
-                                    onChange={(e) => setDateFilter({
-                                        ...dateFilter,
-                                        export: { ...dateFilter.export, startDate: e.target.value }
+                                    value={dates.transactions.startDate}
+                                    onChange={(e) => setDates({
+                                        ...dates,
+                                        transactions: { ...dates.transactions, startDate: e.target.value }
                                     })}
                                 />
                                 <input
                                     type="date"
                                     className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
-                                    value={dateFilter.export.endDate}
-                                    onChange={(e) => setDateFilter({
-                                        ...dateFilter,
-                                        export: { ...dateFilter.export, endDate: e.target.value }
+                                    value={dates.transactions.endDate}
+                                    onChange={(e) => setDates({
+                                        ...dates,
+                                        transactions: { ...dates.transactions, endDate: e.target.value }
                                     })}
                                 />
                                 <button
@@ -402,7 +550,7 @@ export default function Dashboard({ auth }) {
                             total={loading ? 'Loading...' : totalOmzet}
                         />
                 <Widget
-                    title={'Produk Tefa'}
+                            title={'Produk Tefa'}
                     color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
                     icon={<IconBox size={'20'} strokeWidth={'1.5'}/>}
                             total={loading ? 'Loading...' : `${totalProducts} Produk`}
@@ -419,7 +567,7 @@ export default function Dashboard({ auth }) {
                     <Table.Card
                         title={'Top Omzet'}
                         action={
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 py-1.5">
                                 <div className="w-48 relative">
                                     <input
                                         type="text"
@@ -434,18 +582,20 @@ export default function Dashboard({ auth }) {
                                 </div>
                                 <FilterDropdown 
                                     table="topUsers"
-                                    currentFilter={dateFilter.topUsers}
+                                    currentFilter={dates.topUsers}
                                     onFilterChange={(type) => handleFilterChange('topUsers', type)}
                                     onDateChange={(type, value) => handleDateChange('topUsers', type, value)}
                                 />
                             </div>
                         }
                     >
+                        <div className="min-h-[373px] overflow-hidden">
                         {loading ? (
-                            <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                                <div className="h-[373px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                                 Loading...
                             </div>
-                        ) : topUsers.length > 0 ? (
+                        ) : topUsers.data.length > 0 ? (
+                                <>
                         <Table>
                             <Table.Thead>
                                 <tr>
@@ -457,11 +607,12 @@ export default function Dashboard({ auth }) {
                                 </tr>
                             </Table.Thead>
                             <Table.Tbody>
-                                    {topUsers.map((user, i) => {
+                                    {topUsers.data.map((user, i) => {
                                         const { grade, color } = getGrade(user.formatted_omzet);
+                                        const rowNumber = ((topUsers.current_page - 1) * topUsers.per_page) + i + 1;
                                         return (
                                             <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
-                                                <Table.Td className="text-center">{i + 1}</Table.Td>
+                                                <Table.Td className="text-center">{rowNumber}</Table.Td>
                                                 <Table.Td>
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden flex-shrink-0">
@@ -502,11 +653,24 @@ export default function Dashboard({ auth }) {
                                     })}
                             </Table.Tbody>
                         </Table>
-                        ) : (
-                            <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                                    {topUsers.total > topUsers.per_page && (
+                                        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-800">
+                                            <div className="flex justify-end items-center space-x-[2px]">
+                                                {renderPaginationNumbers(
+                                                    topUsers.current_page,
+                                                    Math.ceil(topUsers.total / topUsers.per_page),
+                                                    (page) => handlePageChange('topUsers', page)
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="h-[373px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                                 Tidak ada data
                             </div>
                         )}
+                        </div>
                     </Table.Card>
                 </div>
 
@@ -530,18 +694,20 @@ export default function Dashboard({ auth }) {
                                 </div>
                                 <FilterDropdown 
                                     table="transactions"
-                                    currentFilter={dateFilter.transactions}
+                                    currentFilter={dates.transactions}
                                     onFilterChange={(type) => handleFilterChange('transactions', type)}
                                     onDateChange={(type, value) => handleDateChange('transactions', type, value)}
                                 />
                             </div>
                         }
                     >
+                        <div className="min-h-[500px] overflow-hidden">
                         {loading ? (
-                            <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                                <div className="h-[500px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                                 Loading...
                             </div>
-                        ) : transactions.length > 0 ? (
+                        ) : transactions.data.length > 0 ? (
+                                <>
                             <Table>
                                 <Table.Thead>
                                     <tr>
@@ -552,14 +718,10 @@ export default function Dashboard({ auth }) {
                                     </tr>
                                 </Table.Thead>
                                 <Table.Tbody>
-                                    {transactions.map((transaction, i) => (
+                                    {transactions.data.map((transaction, i) => (
                                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900">
                                             <Table.Td>
-                                                {new Date(transaction.tanggal).toLocaleDateString('id-ID', {
-                                                    day: '2-digit',
-                                                    month: '2-digit',
-                                                    year: '2-digit'
-                                                }).replace(/\./g, '/')}
+                                                        {formatDate(transaction.tanggal)}
                                             </Table.Td>
                                             <Table.Td>
                                                 <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -580,11 +742,24 @@ export default function Dashboard({ auth }) {
                                     ))}
                                 </Table.Tbody>
                             </Table>
-                        ) : (
-                            <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                                    {transactions.total > transactions.per_page && (
+                                        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-800">
+                                            <div className="flex justify-end items-center space-x-[2px]">
+                                                {renderPaginationNumbers(
+                                                    transactions.current_page,
+                                                    Math.ceil(transactions.total / transactions.per_page),
+                                                    (page) => handlePageChange('transactions', page)
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="h-[500px] flex items-center justify-center text-gray-500 dark:text-gray-400">
                                 Tidak ada transaksi
-                            </div>
+                    </div>
                         )}
+                        </div>
                     </Table.Card>
                 </div>
             </div>

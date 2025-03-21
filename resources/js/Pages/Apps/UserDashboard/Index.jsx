@@ -39,7 +39,7 @@ export default function Index({ user }) {
                 </div>
 
                 {/* Speed Dial - only visible on mobile */}
-                <div className="md:hidden fixed bottom-6 right-6 z-50">
+                <div className="fixed bottom-6 right-6 z-50">
                     <div className="relative">
                         {/* Speed Dial Options */}
                         <div className={`absolute bottom-full right-0 mb-4 space-y-2 transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
