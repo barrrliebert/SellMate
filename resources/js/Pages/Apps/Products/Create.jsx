@@ -38,7 +38,7 @@ export default function Create() {
     return (
         <>
             <Head title="Tambah Produk" />
-            <div className="max-w-2xl mx-auto mt-6">
+            <div className="max-w-2xl mx-auto mt-2">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">
                     Tambah Produk Unggulan Tefa
                 </h1>
@@ -48,18 +48,18 @@ export default function Create() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Kolom kiri: Informasi Produk (dengan input Nama, Kategori, dan Deskripsi) */}
                         <div className="border border-purple-300 rounded-md p-4">
-                            <h2 className="text-xl font-bold text-gray-900 ">Informasi Produk/Jasa</h2>
+                            <h2 className="text-xl font-bold text-gray-900 font-verdana ">Informasi Produk/Jasa</h2>
 
                             {/* Input Nama Produk/Jasa */}
                             <div className="flex flex-col gap-2 mt-4">
-                                <label className="text-gray-600 font-verdana text-sm dark:text-gray-300">
+                                <label className="text-gray-900 font-verdana text-sm dark:text-gray-300">
                                     Nama Produk/Jasa <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={data.nama_produk}
                                     onChange={(e) => setData("nama_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                     placeholder="e.g videografi"
                                 />
                                 <InputError message={errors.nama_produk} className="mt-2" />
@@ -67,13 +67,13 @@ export default function Create() {
 
                             {/* Input Kategori */}
                             <div className="flex flex-col gap-2 mt-4">
-                                <label className="text-gray-600 text-sm font-verdana dark:text-gray-300">
+                                <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Kategori <span className="text-red-500">*</span>
                                 </label>
                                 <select
                                     value={data.kategori}
                                     onChange={(e) => setData("kategori", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                 >
                                     <option value="">Pilih Kategori</option>
                                     <option value="produk">Produk</option>
@@ -84,13 +84,13 @@ export default function Create() {
 
                             {/* Input Deskripsi */}
                             <div className="flex flex-col gap-2 mt-4">
-                                <label className="text-gray-600 text-sm dark:text-gray-300 font-verdana">
+                                <label className="text-gray-900 text-sm dark:text-gray-300 font-verdana">
                                     Deskripsi
                                 </label>
                                 <textarea
                                     value={data.deskripsi_produk}
                                     onChange={(e) => setData("deskripsi_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                                     placeholder="Masukkan deskripsi produk/jasa"
                                     rows="4"
                                 />
@@ -99,9 +99,9 @@ export default function Create() {
                         </div>
 
                         {/* Kolom kanan: Foto Produk/Jasa (dibungkus dengan border purple-300) */}
-                        <div className="border border-purple-500 rounded-md p-4">
+                        <div className="border border-purple-500 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 mb-2">Foto Produk/Jasa</h2>
-                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer p-4">
+                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
                                 <input
                                     type="file"
                                     onChange={handleImageChange}
@@ -112,12 +112,12 @@ export default function Create() {
                                     <img
                                         src={previewImage}
                                         alt="Preview"
-                                        className="w-full h-full object-cover rounded-lg hover:opacity-90 transition-opacity duration-300"
+                                        className="absolute top-0 left-0 w-full h-full object-cover rounded-lg hover:opacity-90 transition-opacity duration-300"
                                     />
                                 ) : (
                                     <>
-                                        <IconPhoto size={48} className="text-gray-400" />
-                                        <p className="text-sm text-gray-500">Upload foto produk/jasa</p>
+                                        <IconPhoto size={48} className="text-gray-900" />
+                                        <p className="text-sm text-gray-900">Upload foto produk/jasa</p>
                                     </>
                                 )}
                             </div>
@@ -132,7 +132,7 @@ export default function Create() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Input Harga */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-gray-600 text-sm font-verdana dark:text-gray-300">
+                                <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Harga <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -148,7 +148,7 @@ export default function Create() {
 
                             {/* Input Komisi */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-gray-600 text-sm font-verdana dark:text-gray-300">
+                                <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Komisi <span className="text-red-500">*</span>
                                 </label>
                                 <input

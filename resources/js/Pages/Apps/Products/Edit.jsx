@@ -54,7 +54,7 @@ export default function Edit({ product }) {
 
                             {/* Input Nama Produk/Jasa */}
                             <div className="flex flex-col gap-2 mt-4">
-                                <label className="text-gray-600 font-verdana text-sm dark:text-gray-300">
+                                <label className="text-gray-900 font-verdana text-sm dark:text-gray-300">
                                     Nama Produk/Jasa <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -69,7 +69,7 @@ export default function Edit({ product }) {
 
                             {/* Input Kategori */}
                             <div className="flex flex-col gap-2 mt-4">
-                                <label className="text-gray-600 text-sm font-verdana dark:text-gray-300">
+                                <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Kategori <span className="text-red-500">*</span>
                                 </label>
                                 <select
@@ -86,7 +86,7 @@ export default function Edit({ product }) {
 
                             {/* Input Deskripsi */}
                             <div className="flex flex-col gap-2 mt-4">
-                                <label className="text-gray-600 text-sm dark:text-gray-300 font-verdana">
+                                <label className="text-gray-900 text-sm dark:text-gray-300 font-verdana">
                                     Deskripsi
                                 </label>
                                 <textarea
@@ -101,11 +101,11 @@ export default function Edit({ product }) {
                         </div>
 
                         {/* Kolom kanan: Foto Produk/Jasa */}
-                        <div className="border border-purple-500 rounded-md p-4">
+                        <div className="border border-purple-500 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 mb-2">
                                 Foto Produk/Jasa
                             </h2>
-                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer p-4">
+                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
                                 <input
                                     type="file"
                                     onChange={handleImageChange}
@@ -131,13 +131,13 @@ export default function Edit({ product }) {
 
                     {/* Bungkus Detail Harga/Komisi */}
                     <div className="border border-purple-300 rounded-md p-4 mt-5">
-                        <h2 className="text-xl font-bold text-gray-900 mb-2 font-verdana">
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">
                             Detail Harga/Komisi
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Input Harga */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-gray-600 text-sm font-verdana dark:text-gray-300">
+                                <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Harga <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -152,7 +152,7 @@ export default function Edit({ product }) {
                             </div>
                             {/* Input Komisi */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-gray-600 text-sm font-verdana dark:text-gray-300">
+                                <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Komisi <span className="text-red-500">*</span>
                                 </label>
                                 <input
