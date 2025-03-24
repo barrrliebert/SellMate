@@ -10,7 +10,7 @@ export default function Create() {
         title: '',
         description: '',
         source: '',
-        video_file: null,
+        video_file: null
     });
 
     const [previewVideo, setPreviewVideo] = useState(null);

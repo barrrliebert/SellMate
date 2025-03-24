@@ -22,10 +22,12 @@ class VideoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'video_file' => 'required|mimes:mp4,mov,ogg,qt|max:20000',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'source' => 'nullable|string',
+            'video_file' => $this->isMethod('post')
+            ? 'required|mimes:mp4,mov,ogg,qt|max:20000'
+            : 'nullable|mimes:mp4,mov,ogg,qt|max:20000',
+        'title'       => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'source'      => 'nullable|string',
         ];
     }
 }

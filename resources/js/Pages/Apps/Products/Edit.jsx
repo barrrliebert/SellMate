@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head, useForm } from '@inertiajs/react';
-import { IconPackage, IconPhoto } from '@tabler/icons-react';
+import { IconPhoto } from '@tabler/icons-react';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
+import toast from 'react-hot-toast';
 
 export default function Edit({ product }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -20,7 +21,17 @@ export default function Edit({ product }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(`/apps/products/${product.id}`);
+        const loadingToast = toast.loading('Sedang menyimpan data produk...');
+        post(`/apps/products/${product.id}`, {
+            onSuccess: () => {
+                toast.dismiss(loadingToast);
+                toast.success('Produk berhasil diubah!');
+            },
+            onError: () => {
+                toast.dismiss(loadingToast);
+                toast.error('Gagal mengubah produk. Silakan coba lagi.');
+            }
+        });
     };
 
     const handleImageChange = (e) => {
@@ -51,8 +62,6 @@ export default function Edit({ product }) {
                             <h2 className="text-xl font-bold text-gray-900">
                                 Informasi Produk/Jasa
                             </h2>
-
-                            {/* Input Nama Produk/Jasa */}
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="text-gray-900 font-verdana text-sm dark:text-gray-300">
                                     Nama Produk/Jasa <span className="text-red-500">*</span>
@@ -67,7 +76,6 @@ export default function Edit({ product }) {
                                 <InputError message={errors.nama_produk} className="mt-2" />
                             </div>
 
-                            {/* Input Kategori */}
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Kategori <span className="text-red-500">*</span>
@@ -84,7 +92,6 @@ export default function Edit({ product }) {
                                 <InputError message={errors.kategori} className="mt-2" />
                             </div>
 
-                            {/* Input Deskripsi */}
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="text-gray-900 text-sm dark:text-gray-300 font-verdana">
                                     Deskripsi
@@ -92,9 +99,8 @@ export default function Edit({ product }) {
                                 <textarea
                                     value={data.deskripsi_produk}
                                     onChange={(e) => setData("deskripsi_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-32"
                                     placeholder="Masukkan deskripsi produk/jasa"
-                                    rows="4"
                                 />
                                 <InputError message={errors.deskripsi_produk} className="mt-2" />
                             </div>
@@ -129,13 +135,12 @@ export default function Edit({ product }) {
                         </div>
                     </div>
 
-                    {/* Bungkus Detail Harga/Komisi */}
+                    {/* Detail Harga/Komisi */}
                     <div className="border border-purple-300 rounded-md p-4 mt-5">
                         <h2 className="text-xl font-bold text-gray-900 mb-2">
                             Detail Harga/Komisi
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Input Harga */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Harga <span className="text-red-500">*</span>
@@ -150,7 +155,6 @@ export default function Edit({ product }) {
                                 />
                                 <InputError message={errors.harga_produk} className="mt-2" />
                             </div>
-                            {/* Input Komisi */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Komisi <span className="text-red-500">*</span>
@@ -183,4 +187,4 @@ export default function Edit({ product }) {
     );
 }
 
-Edit.layout = page => <AppLayout children={page} />
+Edit.layout = page => <AppLayout children={page} />;

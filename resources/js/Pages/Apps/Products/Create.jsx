@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import AppLayout from "@/Layouts/AppLayout";
-import { Head, useForm } from "@inertiajs/react";
-import { IconPackage, IconPhoto } from "@tabler/icons-react";
-import InputError from "@/Components/InputError";
-import Button from "@/Components/Button";
+import React, { useState } from 'react';
+import AppLayout from '@/Layouts/AppLayout';
+import { Head, useForm, router } from '@inertiajs/react';
+import InputError from '@/Components/InputError';
+import Button from '@/Components/Button';
+import { IconPhoto } from '@tabler/icons-react';
+import toast from 'react-hot-toast';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -19,13 +20,23 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post("/apps/products");
+        const loadingToast = toast.loading('Sedang menyimpan data produk...');
+        post('/apps/products', {
+            onSuccess: () => {
+                toast.dismiss(loadingToast);
+                toast.success('Produk berhasil ditambahkan!');
+                router.visit('/apps/products');
+            },
+            onError: () => {
+                toast.dismiss(loadingToast);
+                toast.error('Gagal menambahkan produk. Silakan coba lagi.');
+            }
+        });
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        setData("foto_produk", file);
-
+        setData('foto_produk', file);
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -46,11 +57,11 @@ export default function Create() {
             <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-4 max-w-2xl mx-auto">
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Kolom kiri: Informasi Produk (dengan input Nama, Kategori, dan Deskripsi) */}
+                        {/* Kolom Informasi Produk/Jasa */}
                         <div className="border border-purple-300 rounded-md p-4">
-                            <h2 className="text-xl font-bold text-gray-900 font-verdana ">Informasi Produk/Jasa</h2>
-
-                            {/* Input Nama Produk/Jasa */}
+                            <h2 className="text-xl font-bold text-gray-900 font-verdana">
+                                Informasi Produk/Jasa
+                            </h2>
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="text-gray-900 font-verdana text-sm dark:text-gray-300">
                                     Nama Produk/Jasa <span className="text-red-500">*</span>
@@ -64,8 +75,6 @@ export default function Create() {
                                 />
                                 <InputError message={errors.nama_produk} className="mt-2" />
                             </div>
-
-                            {/* Input Kategori */}
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Kategori <span className="text-red-500">*</span>
@@ -81,8 +90,6 @@ export default function Create() {
                                 </select>
                                 <InputError message={errors.kategori} className="mt-2" />
                             </div>
-
-                            {/* Input Deskripsi */}
                             <div className="flex flex-col gap-2 mt-4">
                                 <label className="text-gray-900 text-sm dark:text-gray-300 font-verdana">
                                     Deskripsi
@@ -90,15 +97,14 @@ export default function Create() {
                                 <textarea
                                     value={data.deskripsi_produk}
                                     onChange={(e) => setData("deskripsi_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-32"
                                     placeholder="Masukkan deskripsi produk/jasa"
-                                    rows="4"
                                 />
                                 <InputError message={errors.deskripsi_produk} className="mt-2" />
                             </div>
                         </div>
 
-                        {/* Kolom kanan: Foto Produk/Jasa (dibungkus dengan border purple-300) */}
+                        {/* Kolom Foto Produk/Jasa */}
                         <div className="border border-purple-500 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 mb-2">Foto Produk/Jasa</h2>
                             <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
@@ -125,12 +131,12 @@ export default function Create() {
                         </div>
                     </div>
 
-                    {/* Bungkus Detail Harga/Komisi */}
+                    {/* Detail Harga/Komisi */}
                     <div className="border border-purple-300 rounded-md p-4 mt-5">
-                        <h2 className="text-xl font-bold text-gray-900 mb-2 font-verdana">Detail Harga/Komisi</h2>
-                        {/* Grup: Input Harga dan Komisi */}
+                        <h2 className="text-xl font-bold text-gray-900 mb-2 font-verdana">
+                            Detail Harga/Komisi
+                        </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Input Harga */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Harga <span className="text-red-500">*</span>
@@ -145,8 +151,6 @@ export default function Create() {
                                 />
                                 <InputError message={errors.harga_produk} className="mt-2" />
                             </div>
-
-                            {/* Input Komisi */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-gray-900 text-sm font-verdana dark:text-gray-300">
                                     Komisi <span className="text-red-500">*</span>

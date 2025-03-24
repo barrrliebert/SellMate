@@ -15,10 +15,13 @@ export default function Edit({ video }) {
         video_file: null
     });
 
-    const [previewVideo, setPreviewVideo] = useState(video.video_file);
+    const [previewVideo, setPreviewVideo] = useState(video.video_file ? `/storage/${video.video_file}` : null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!data.video_file) {
+            delete data.video_file;
+        }
         post(`/apps/videos/${video.id}`);
     };
 
@@ -26,7 +29,11 @@ export default function Edit({ video }) {
         const file = e.target.files[0];
         setData('video_file', file);
         if (file && file.type.startsWith('video/')) {
+            if (previewVideo && previewVideo.startsWith('blob:')) {
+                URL.revokeObjectURL(previewVideo);
+            }
             const url = URL.createObjectURL(file);
+            // Set previewVideo dengan memaksa re-render
             setPreviewVideo(url);
         }
     };
@@ -100,7 +107,7 @@ export default function Edit({ video }) {
                             <InputError message={errors.video_file} className="mt-2" />
                             {previewVideo && (
                                 <div className="mt-4">
-                                    <video controls className="w-64 h-auto rounded-lg">
+                                    <video key={previewVideo} controls className="w-64 h-auto rounded-lg">
                                         <source src={previewVideo} type="video/mp4" />
                                         Browser tidak mendukung video.
                                     </video>
