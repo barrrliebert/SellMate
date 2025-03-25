@@ -66,7 +66,7 @@ export default function SpeedDial({ isUserAccess, className = '', isOpenByDefaul
                             <>
                                 <Link 
                                     href="/apps/dashboard" 
-                                    className={`flex flex-col items-center gap-1 hover:scale-110 transition-transform ${getLinkStyles('/apps/dashboard')}`}
+                                    className={`flex flex-col items-center gap-1 hover:scale-110 transition-transform md:hidden ${getLinkStyles('/apps/dashboard')}`}
                                 >
                                     <IconLayout2 size={20} strokeWidth={1.5} />
                                     <span className="text-[10px] font-medium">Home</span>
@@ -97,13 +97,23 @@ export default function SpeedDial({ isUserAccess, className = '', isOpenByDefaul
                     </div>
                 </div>
 
-                {/* Main Button */}
-                <button
-                    onClick={() => setIsSpeedDialOpen(!isSpeedDialOpen)}
-                    className={`relative text-white transition-all duration-200 hover:scale-110 ${isSpeedDialOpen ? 'rotate-45' : ''}`}
-                >
-                    <IconCategory2 size={20} strokeWidth={1.5} />
-                </button>
+                {/* Main Button or Link based on screen size */}
+                {isMediumScreen ? (
+                    <Link
+                        href={userAccess ? "/apps/user-dashboard" : "/apps/dashboard"}
+                        className={`relative text-white transition-all duration-200 hover:scale-110 flex flex-col items-center justify-center ${getLinkStyles('/apps/dashboard')}`}
+                    >
+                        <IconCategory2 size={20} strokeWidth={1.5} />
+                        <span className="text-[10px] font-medium">Home</span>
+                    </Link>
+                ) : (
+                    <button
+                        onClick={() => setIsSpeedDialOpen(!isSpeedDialOpen)}
+                        className={`relative text-white transition-all duration-200 hover:scale-110 ${isSpeedDialOpen ? 'rotate-45' : ''}`}
+                    >
+                        <IconCategory2 size={20} strokeWidth={1.5} />
+                    </button>
+                )}
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { IconPackage, IconUser, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { IconPackage, IconUser, IconChevronLeft, IconChevronRight, IconPlus, IconTarget, IconCoin } from '@tabler/icons-react';
 import axios from 'axios';
 
 export default function Detail({ type }) {
@@ -22,6 +22,7 @@ export default function Detail({ type }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage, setPerPage] = useState(7);
+    const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
 
     // Define clickOutside ref
     const calendarRef = useRef(null);
@@ -346,19 +347,19 @@ export default function Detail({ type }) {
                 ));
             } else {
                 // For date view (from selected date to today), group by week
-                const groupedData = groupDataByWeek(data);
-                return Object.entries(groupedData).map(([week, items]) => (
+        const groupedData = groupDataByWeek(data);
+        return Object.entries(groupedData).map(([week, items]) => (
                     <div key={week} className="mb-4">
                         <div className="bg-[#F9E0D1] py-2 px-4">
                             <h3 className="text-sm font-medium text-gray-900">
-                                Minggu {week}
-                            </h3>
-                        </div>
+                        Minggu {week}
+                    </h3>
+                </div>
                         <div className="bg-white divide-y divide-gray-100">
-                            {items.map((item, index) => renderItem(item, index))}
-                        </div>
-                    </div>
-                ));
+                    {items.map((item, index) => renderItem(item, index))}
+                </div>
+            </div>
+        ));
             }
         }
 
@@ -657,38 +658,38 @@ export default function Detail({ type }) {
                                 {/* Monthly View - Second Slide */}
                                 <div className="w-full flex-shrink-0 pr-4">
                                     <div className="flex items-center h-[30px] relative rounded-full overflow-hidden border border-[#EDA375] max-w-[382px] mx-auto">
-                                        <button 
+                                            <button 
                                             onClick={() => setViewMode('1month')}
                                             className={`flex-1 h-full px-2 text-sm text-black text-center ${
                                                 viewMode === '1month' ? 'bg-[#F3BA9B]' : 'bg-white'
-                                            }`}
-                                        >
-                                            1 bulan
-                                        </button>
-                                        <button 
+                                                }`}
+                                            >
+                                                1 bulan
+                                            </button>
+                                            <button 
                                             onClick={() => setViewMode('3month')}
                                             className={`flex-1 h-full px-2 text-sm text-black text-center ${
                                                 viewMode === '3month' ? 'bg-[#F3BA9B]' : 'bg-white'
-                                            }`}
-                                        >
-                                            3 bulan
-                                        </button>
-                                        <button 
+                                                }`}
+                                            >
+                                                3 bulan
+                                            </button>
+                                            <button 
                                             onClick={() => setViewMode('6month')}
                                             className={`flex-1 h-full px-2 text-sm text-black text-center ${
                                                 viewMode === '6month' ? 'bg-[#F3BA9B]' : 'bg-white'
-                                            }`}
-                                        >
-                                            6 bulan
-                                        </button>
-                                        <button 
+                                                }`}
+                                            >
+                                                6 bulan
+                                            </button>
+                                            <button 
                                             onClick={() => setViewMode('12month')}
                                             className={`flex-1 h-full px-2 text-sm text-black text-center ${
                                                 viewMode === '12month' ? 'bg-[#F3BA9B]' : 'bg-white'
-                                            }`}
-                                        >
-                                            1 tahun
-                                        </button>
+                                                }`}
+                                            >
+                                                1 tahun
+                                            </button>
                                     </div>
                                 </div>
                             </div>
@@ -782,6 +783,35 @@ export default function Detail({ type }) {
 
                 {/* Footer Navigation - Only show for transactions and commissions */}
                 {(type === 'transactions' || type === 'commissions') && renderDateNavigation()}
+
+                {/* Speed Dial - only visible on mobile */}
+                <div className="fixed bottom-6 right-6 z-50">
+                    <div className="relative">
+                        {/* Speed Dial Options */}
+                        <div className={`absolute bottom-full right-0 mb-4 space-y-2 transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                            <Link
+                                href="/apps/user-dashboard/target/edit"
+                                className="flex items-center gap-2 bg-purple-700 text-white p-2.5 rounded-full shadow-lg hover:bg-purple-800 transition-colors"
+                            >
+                                <IconTarget size={32} />
+                            </Link>
+                            <Link
+                                href="/apps/user-dashboard/omzet"
+                                className="flex items-center gap-2 bg-purple-700 text-white p-2.5 rounded-full shadow-lg hover:bg-purple-800 transition-colors"
+                            >
+                                <IconCoin size={32} />
+                            </Link>
+                        </div>
+
+                        {/* Main Button */}
+                        <button
+                            onClick={() => setIsSpeedDialOpen(!isSpeedDialOpen)}
+                            className={`bg-purple-500 shadow hover:bg-purple-800 text-white hover:text-white rounded-full p-3 transition-all duration-200 hover:scale-110 ${isSpeedDialOpen ? 'bg-purple-800 text-white rotate-45' : ''}`}
+                        >
+                            <IconPlus size={28} />
+                        </button>
+                    </div>
+                </div>
             </div>
         </>
     );

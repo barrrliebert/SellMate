@@ -49,18 +49,18 @@ export default function Index({ videos }) {
     };
 
     return (
-        <>
+        <div className="lg:p-0 p-4">
             <Head title="Videos" />
 
-            <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center">
-                    <IconVideo size={20} strokeWidth={1.5} className="mr-2" />
-                    <h1 className="text-xl font-semibold">Video List</h1>
+            <div className="flex justify-between items-center mb-10">
+            <div className="flex flex-col">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Katalog Video</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Kelola video dengan mudah</p>
                 </div>
                 {hasAnyPermission(["videos-create"]) && (
                     <Link
                         href="/apps/videos/create"
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition"
                     >
                         Tambah Video
                     </Link>
@@ -69,9 +69,9 @@ export default function Index({ videos }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(Array.isArray(videos) ? videos : []).map((video) => (
-                    <div key={video.id} className="relative border p-4 bg-white rounded-lg shadow-md">
+                    <div key={video.id} className="relative border border-[#D4A8EF] p-4 bg-white rounded-2xl shadow-md">
                         <div
-                            className="mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px] cursor-pointer"
+                            className="mb-4 rounded-2xl overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px] cursor-pointer"
                             onClick={() => handleTogglePlay(video.id)}
                         >
                             {video.video_file ? (
@@ -104,31 +104,31 @@ export default function Index({ videos }) {
                             )}
                         </div>
 
-                        <h3 className="font-semibold text-lg mb-2 text-left text-gray-600 dark:text-white">
+                        <h3 className="font-semibold text-lg mb-2 text-left text-gray-900 dark:text-white">
                             {video.title}
                         </h3>
 
-                        <span className="block text-sm text-gray-500 dark:text-gray-400">
+                        <span className="block text-sm text-gray-800 dark:text-gray-400">
                             {video.source}
                         </span>
 
                         {/* Tombol Aksi */}
-                        <div className="absolute -bottom-10 right-0 flex gap-2">
+                        <div className="flex gap-2 justify-end mt-4">
                             {/* Tombol Generate Link */}
                             <button
                                 onClick={() => handleGenerateLink(video)}
-                                className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition transform hover:scale-110"
+                                className="text-indigo-900 p-2 rounded-full hover:bg-indigo-200 transition transform hover:scale-110"
                             >
-                                <IconLink size={16} />
+                                <IconLink size={20} />
                             </button>
 
                             {/* Tombol Edit */}
                             {hasAnyPermission(["videos-update"]) && (
                                 <Link
                                     href={`/apps/videos/${video.id}/edit`}
-                                    className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 transition transform hover:scale-110"
+                                    className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
                                 >
-                                    <IconEdit size={16} />
+                                    <IconEdit size={20} />
                                 </Link>
                             )}
 
@@ -136,16 +136,16 @@ export default function Index({ videos }) {
                             {hasAnyPermission(["videos-delete"]) && (
                                 <button
                                     onClick={() => handleDelete(video.id)}
-                                    className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition transform hover:scale-110"
+                                    className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
                                 >
-                                    <IconTrash size={16} />
+                                    <IconTrash size={20} />
                                 </button>
                             )}
                         </div>
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 }
 

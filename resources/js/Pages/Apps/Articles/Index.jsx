@@ -17,7 +17,7 @@ export default function Index({ articles }) {
             confirmButtonText: 'Ya, hapus!',
             cancelButtonText: 'Batal'
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (result.isConfirmed) {-
                 router.delete(`/apps/articles/${id}`);
                 Swal.fire({
                     title: 'Berhasil!',
@@ -32,17 +32,17 @@ export default function Index({ articles }) {
 
     return (
         <>
-            <Head title="Articles" />
+            <Head title="Katalog Artikel" />
 
-            <div className="flex justify-between items-center">
-                <div className="flex items-center mb-3">
-                    <IconFileDescription size={20} strokeWidth={1.5} className="mr-2" />
-                    <h1 className="text-xl font-semibold">Article List</h1>
+            <div className="flex justify-between items-center mb-10">
+                <div className="flex flex-col">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Katalog Artikel</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Kelola artikel dengan mudah</p>
                 </div>
                 {hasAnyPermission(['articles-create']) && (
                     <Link
                         href="/apps/articles/create"
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition"
                     >
                         Tambah Artikel
                     </Link>
@@ -52,8 +52,8 @@ export default function Index({ articles }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(Array.isArray(articles) ? articles : []).map((article) => (
                     <div key={article.id} className="relative">
-                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 flex flex-col">
-                            <div className="mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px]">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 flex flex-col border border-[#D4A8EF] dark:border-gray-900 shadow-sm">
+                            <div className="mb-4 rounded-2xl overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px]">
                                 {article.thumbnail ? (
                                     <img
                                         src={article.thumbnail.startsWith('http') 
@@ -70,39 +70,41 @@ export default function Index({ articles }) {
                                 )}
                             </div>
                             
-                            <h3 className="font-semibold text-lg mb-2 text-left text-gray-600 dark:text-white">
+                            <h3 className="font-semibold text-lg mb-2 text-left text-gray-900 dark:text-white">
                                 {article.title}
                             </h3>
                             
-                            <span className="block text-sm text-gray-500 dark:text-gray-400 mb-2">
+                            <span className="block text-sm text-gray-800 dark:text-gray-400 mb-2">
                                 {article.author}
                             </span>
                             
-                            <Link
-                                href={`/apps/articles/${article.id}`}
-                                className="text-indigo-600 dark:text-indigo-400 text-sm underline"
-                            >
-                                Baca Selengkapnya
-                            </Link>
-                        </div>
-                        
-                        <div className="absolute -bottom-10 right-0 flex gap-2">
-                            {hasAnyPermission(['articles-update']) && (
+                            <div className="flex justify-between items-center">
                                 <Link
-                                    href={`/apps/articles/${article.id}/edit`}
-                                    className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 transition transform hover:scale-110"
+                                    href={`/apps/articles/${article.id}`}
+                                    className="text-indigo-600 dark:text-indigo-400 text-sm underline"
                                 >
-                                    <IconEdit size={16} />
+                                    Baca Selengkapnya
                                 </Link>
-                            )}
-                            {hasAnyPermission(['articles-delete']) && (
-                                <button
-                                    onClick={() => handleDelete(article.id)}
-                                    className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition transform hover:scale-110"
-                                >
-                                    <IconTrash size={16} />
-                                </button>
-                            )}
+                                
+                                <div className="flex gap-1">
+                                    {hasAnyPermission(['articles-delete']) && (
+                                        <button
+                                            onClick={() => handleDelete(article.id)}
+                                            className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
+                                        >
+                                            <IconTrash size={20} />
+                                        </button>
+                                    )}
+                                    {hasAnyPermission(['articles-update']) && (
+                                        <Link
+                                            href={`/apps/articles/${article.id}/edit`}
+                                            className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
+                                        >
+                                            <IconEdit size={20} />
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}

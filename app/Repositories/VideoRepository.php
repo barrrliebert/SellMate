@@ -31,19 +31,27 @@ class VideoRepository
         return $this->model->create($data);
     }
 
-    public function update($id, array $data)
-    {
-        $video = $this->findById($id);
-        if (isset($data['video_file'])) {
-            if ($video->file_video) {
-                // Pastikan file path tidak null atau kosong sebelum dihapus
-                Storage::disk('public')->delete($video->file_video);
+ 
+        public function update($id, array $data)
+        {
+            $video = $this->findById($id);
+        
+            if (isset($data['video_file']) && $data['video_file'] instanceof \Illuminate\Http\UploadedFile) {
+                // Hapus video lama jika ada
+                if ($video->video_file) {
+                    Storage::disk('public')->delete($video->video_file);
+                }
+                // Simpan video baru
+                $data['video_file'] = $data['video_file']->store('videos', 'public');
+            } else {
+                // Hapus kunci video_file dari data update agar tidak mengubah nilai yang ada
+                unset($data['video_file']);
             }
-            $data['video_file'] = $data['video_file']->store('videos', 'public');
+        
+            $video->update($data);
+            return $video;
         }
-        $video->update($data);
-        return $video;
-    }
+    
 
     public function delete($id)
     {

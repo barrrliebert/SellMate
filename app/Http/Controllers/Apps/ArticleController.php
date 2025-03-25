@@ -65,4 +65,18 @@ class ArticleController extends Controller
         $this->repository->delete($id);
         return redirect()->route('apps.articles.index')->with('success', 'Article deleted successfully.');
     }
+
+    // Menampilkan detail artikel
+    public function show($id)
+    {
+        $article = $this->repository->findById($id);
+
+        if (!$article) {
+            return redirect()->route('apps.articles.index')->with('error', 'Article not found.');
+        }
+
+        return inertia('Apps/Articles/Show', [
+            'article' => $article
+        ]);
+    }
 }
