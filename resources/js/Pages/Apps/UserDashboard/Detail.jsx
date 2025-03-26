@@ -21,7 +21,7 @@ export default function Detail({ type }) {
     const [isDragging, setIsDragging] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [perPage, setPerPage] = useState(7);
+    const [perPage, setPerPage] = useState(10);
     const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
 
     // Define clickOutside ref

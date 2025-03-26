@@ -4,7 +4,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
 import { IconPhoto } from '@tabler/icons-react';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -20,16 +20,21 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const loadingToast = toast.loading('Sedang menyimpan data produk...');
-        post('/apps/products', {
+
+        const loadingToast = toast.loading('Menyimpan produk...');
+
+        post('/apps/products', data, {
             onSuccess: () => {
                 toast.dismiss(loadingToast);
-                toast.success('Produk berhasil ditambahkan!');
-                router.visit('/apps/products');
+                // Delay before redirect to show success message
+                setTimeout(() => {
+                    toast.success('Produk berhasil ditambahkan!');
+                    router.visit('/apps/products');
+                }, 1000);
             },
             onError: () => {
                 toast.dismiss(loadingToast);
-                toast.error('Gagal menambahkan produk. Silakan coba lagi.');
+                toast.error('Gagal menambahkan produk!');
             }
         });
     };
@@ -49,6 +54,7 @@ export default function Create() {
     return (
         <>
             <Head title="Tambah Produk" />
+            <Toaster position="top-right" />
             <div className="max-w-2xl mx-auto mt-2">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">
                     Tambah Produk Unggulan Tefa

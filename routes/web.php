@@ -87,6 +87,7 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
     Route::resource('/videos', VideoController::class)->except('show');
     // articles route
     Route::resource('/articles', ArticleController::class)->except('show');
+    Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
 });
 
 require __DIR__.'/auth.php';

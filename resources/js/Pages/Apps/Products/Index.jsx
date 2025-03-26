@@ -5,6 +5,7 @@ import { IconEdit, IconTrash, IconPackage } from "@tabler/icons-react";
 import hasAnyPermission from "@/Utils/Permissions";
 import Swal from "sweetalert2";
 import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 // Fungsi utilitas untuk truncate teks
 const truncate = (str, maxLength = 100) => {
@@ -18,7 +19,10 @@ export default function Index({ products, flash }) {
 
     useEffect(() => {
         if (flash && flash.success) {
-            toast.success(flash.success);
+            // Add delay to flash success message
+            setTimeout(() => {
+                toast.success(flash.success);
+            }, 1000);
         }
     }, [flash]);
 
@@ -42,13 +46,17 @@ export default function Index({ products, flash }) {
             cancelButtonText: "Batal",
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(`/apps/products/${id}`);
-                Swal.fire({
-                    title: "Berhasil!",
-                    text: "Data produk berhasil dihapus.",
-                    icon: "success",
-                    timer: 1000,
-                    showConfirmButton: false,
+                const loadingToast = toast.loading('Menghapus produk...');
+                
+                router.delete(`/apps/products/${id}`, {
+                    onSuccess: () => {
+                        toast.dismiss(loadingToast);
+                        toast.success('Produk berhasil dihapus!');
+                    },
+                    onError: () => {
+                        toast.dismiss(loadingToast);
+                        toast.error('Gagal menghapus produk!');
+                    }
                 });
             }
         });
@@ -57,6 +65,7 @@ export default function Index({ products, flash }) {
     return (
         <>
             <Head title="Products" />
+            <Toaster position="top-right" />
 
             {/* Header Katalog Produk */}
             <div className="mx-6 flex flex-col">

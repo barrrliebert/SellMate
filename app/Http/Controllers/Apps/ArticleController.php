@@ -46,30 +46,30 @@ class ArticleController extends Controller
         return redirect()->route('apps.articles.index')->with('success', 'Article created successfully.');
     }
 
-    public function edit($id)
+    public function edit($slug)
     {
-        $article = $this->repository->findById($id);
+        $article = $this->repository->findBySlug($slug);
         return inertia('Apps/Articles/Edit', [
             'article' => $article
         ]);
     }
 
-    public function update(ArticleRequest $request, $id)
+    public function update(ArticleRequest $request, $slug)
     {
-        $this->repository->update($id, $request->validated());
+        $this->repository->updateBySlug($slug, $request->validated());
         return redirect()->route('apps.articles.index')->with('success', 'Article updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy($slug)
     {
-        $this->repository->delete($id);
+        $this->repository->deleteBySlug($slug);
         return redirect()->route('apps.articles.index')->with('success', 'Article deleted successfully.');
     }
 
     // Menampilkan detail artikel
-    public function show($id)
+    public function show($slug)
     {
-        $article = $this->repository->findById($id);
+        $article = $this->repository->findBySlug($slug);
 
         if (!$article) {
             return redirect()->route('apps.articles.index')->with('error', 'Article not found.');

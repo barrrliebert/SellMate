@@ -61,6 +61,41 @@ class ArticleRepository
         return $article->delete();
     }
 
+    public function findBySlug($slug)
+    {
+        return $this->model->where('slug', $slug)->firstOrFail();
+    }
+
+    public function updateBySlug($slug, array $data)
+    {
+        $article = $this->findBySlug($slug);
+
+        // Only update thumbnail if a new file is uploaded
+        if (isset($data['thumbnail']) && $data['thumbnail'] !== null) {
+            if ($article->thumbnail) {
+                Storage::delete($article->thumbnail);
+            }
+            $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
+        } else {
+            // Remove thumbnail from data if no new file is uploaded
+            unset($data['thumbnail']);
+        }
+
+        $article->update($data);
+        return $article;
+    }
+
+    public function deleteBySlug($slug)
+    {
+        $article = $this->findBySlug($slug);
+
+        if ($article->thumbnail) {
+            Storage::delete($article->thumbnail);
+        }
+
+        return $article->delete();
+    }
+
     private function storeThumbnail($file)
     {
         return $file->store('thumbnails', 'public');

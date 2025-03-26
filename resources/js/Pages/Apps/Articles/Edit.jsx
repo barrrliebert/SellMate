@@ -24,7 +24,7 @@ export default function Edit({ article }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(`/apps/articles/${article.id}`);
+        post(`/apps/articles/${article.slug}`);
     };
 
     const handleThumbnailChange = (e) => {

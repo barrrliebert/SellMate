@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { IconPhoto } from '@tabler/icons-react';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function Edit({ product }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -21,15 +21,21 @@ export default function Edit({ product }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const loadingToast = toast.loading('Sedang menyimpan data produk...');
-        post(`/apps/products/${product.id}`, {
+
+        const loadingToast = toast.loading('Memperbarui produk...');
+
+        post(`/apps/products/${product.id}`, data, {
             onSuccess: () => {
                 toast.dismiss(loadingToast);
-                toast.success('Produk berhasil diubah!');
+                // Delay before redirect to show success message
+                setTimeout(() => {
+                    toast.success('Produk berhasil diperbarui!');
+                    router.visit('/apps/products');
+                }, 1000);
             },
             onError: () => {
                 toast.dismiss(loadingToast);
-                toast.error('Gagal mengubah produk. Silakan coba lagi.');
+                toast.error('Gagal memperbarui produk!');
             }
         });
     };
@@ -49,6 +55,7 @@ export default function Edit({ product }) {
     return (
         <>
             <Head title="Edit Produk" />
+            <Toaster position="top-right" />
             <div className="max-w-2xl mx-auto mt-6">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">
                     Edit Produk Unggulan Tefa

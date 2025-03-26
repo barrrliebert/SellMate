@@ -3,10 +3,15 @@ import Table from '@/Components/Table';
 import Widget from '@/Components/Widget';
 import AppLayout from '@/Layouts/AppLayout';
 import { Head } from '@inertiajs/react';
-import { IconBox, IconWallet, IconUsers, IconUser, IconDownload, IconFilter, IconSearch } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
+import { IconBox, IconWallet, IconUsers, IconUser, IconDownload, IconFilter, IconSearch, IconCalendar, IconX } from '@tabler/icons-react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Menu } from '@headlessui/react';
+import { toast } from 'react-hot-toast';
+import { DateRange } from 'react-date-range';
+import { format, isValid } from 'date-fns';
+import 'react-date-range/dist/styles.css';
+import 'react-date-range/dist/theme/default.css';
 
 export default function Dashboard({ auth }) {
     const [totalProducts, setTotalProducts] = useState(0);
@@ -34,6 +39,15 @@ export default function Dashboard({ auth }) {
         transactions: { startDate: null, endDate: null }
     });
     const [totalOmzet, setTotalOmzet] = useState('Rp 0');
+    const [exportDateRange, setExportDateRange] = useState([
+        {
+            startDate: null,
+            endDate: null,
+            key: 'selection'
+        }
+    ]);
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+    const datePickerRef = useRef(null);
 
     // Filter options for export
     const filterOptions = [
@@ -62,10 +76,24 @@ export default function Dashboard({ auth }) {
         fetchData(searchTopUsers, searchTransactions);
     }, [filters.topUsers, filters.transactions]);
 
+    // Close date picker when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+                setIsDatePickerOpen(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const handleFilterChange = (table, type) => {
         if (type !== 'custom') {
             setFilters(prev => ({
-                ...prev,
+            ...prev,
                 [table]: type
             }));
             // Langsung fetch data untuk filter non-custom
@@ -171,8 +199,12 @@ export default function Dashboard({ auth }) {
             let params = { filter };
             
             if (filter === 'custom') {
-                params.start_date = dates.transactions.startDate;
-                params.end_date = dates.transactions.endDate;
+                if (!exportDateRange[0].startDate || !exportDateRange[0].endDate) {
+                    toast.error('Pilih tanggal terlebih dahulu!');
+                    return;
+                }
+                params.start_date = format(exportDateRange[0].startDate, 'yyyy-MM-dd');
+                params.end_date = format(exportDateRange[0].endDate, 'yyyy-MM-dd');
             }
 
             const response = await axios.get('/apps/omzets/export-pdf', {
@@ -188,11 +220,21 @@ export default function Dashboard({ auth }) {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
+            toast.success('PDF berhasil di-export!');
         } catch (error) {
             console.error('Error exporting PDF:', error);
+            toast.error('Gagal mengexport PDF!');
         } finally {
             setExportLoading(false);
         }
+    };
+
+    // Format date range for display
+    const formatDateRange = () => {
+        if (!exportDateRange[0].startDate || !exportDateRange[0].endDate) {
+            return 'Pilih tanggal';
+        }
+        return `${format(exportDateRange[0].startDate, 'dd/MM/yy')} - ${format(exportDateRange[0].endDate, 'dd/MM/yy')}`;
     };
 
     const getGrade = (totalOmzet) => {
@@ -478,64 +520,90 @@ export default function Dashboard({ auth }) {
                     Tetap monitoring progress dan update aktivitas pendapatan Tefa
                 </p>
                 </div>
-                <Menu as="div" className="relative">
-                    <Menu.Button 
-                        disabled={exportLoading}
-                        className="inline-flex items-center mt-6 gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 disabled:opacity-70"
-                    >
-                        {exportLoading ? 'Mengexport...' : (
-                            <>
-                                Export
-                                <IconDownload size={16} strokeWidth={1.5} />
-                            </>
+                <div className="flex items-center gap-3">
+                    {/* Date Range Picker */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+                            className="flex items-center gap-2 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200"
+                        >
+                            <IconCalendar size={16} className="text-gray-500" />
+                            <span className="min-w-[140px]">{formatDateRange()}</span>
+                            {exportDateRange[0].startDate && exportDateRange[0].endDate && (
+                                <IconX
+                                    size={16}
+                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExportDateRange([{
+                                            startDate: null,
+                                            endDate: null,
+                                            key: 'selection'
+                                        }]);
+                                    }}
+                                />
+                            )}
+                        </button>
+
+                        {/* Date Range Picker Popover */}
+                        {isDatePickerOpen && (
+                            <div
+                                ref={datePickerRef}
+                                className="absolute z-50 mt-2"
+                            >
+                                <DateRange
+                                    onChange={item => setExportDateRange([item.selection])}
+                                    moveRangeOnFirstSelection={false}
+                                    ranges={exportDateRange}
+                                    className="border-2 border-[#D4A8EF] rounded-lg shadow-lg"
+                                />
+                            </div>
                         )}
-                    </Menu.Button>
-                    <Menu.Items className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-lg border dark:border-gray-800 py-1 z-50">
-                        {filterOptions.map((option) => (
-                            <Menu.Item key={option.value}>
+                    </div>
+
+                    {/* Export Button */}
+                    <Menu as="div" className="relative">
+                        <Menu.Button 
+                            disabled={exportLoading}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 disabled:opacity-70"
+                        >
+                            {exportLoading ? 'Mengexport...' : (
+                                <>
+                                    Export
+                                    <IconDownload size={16} strokeWidth={1.5} />
+                                </>
+                            )}
+                        </Menu.Button>
+                        <Menu.Items className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-lg border dark:border-gray-800 py-1 z-50">
+                            {filterOptions.map((option) => (
+                                <Menu.Item key={option.value}>
+                                    {({ active }) => (
+                                        <button
+                                            onClick={() => handleExport(option.value)}
+                                            className={`${
+                                                active ? 'bg-gray-100 dark:bg-gray-800' : ''
+                                            } w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    )}
+                                </Menu.Item>
+                            ))}
+                            <Menu.Item>
                                 {({ active }) => (
                                     <button
-                                        onClick={() => handleExport(option.value)}
+                                        onClick={() => handleExport('custom')}
                                         className={`${
                                             active ? 'bg-gray-100 dark:bg-gray-800' : ''
                                         } w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200`}
                                     >
-                                        {option.label}
+                                        Export by Date Range
                                     </button>
                                 )}
                             </Menu.Item>
-                        ))}
-                        <div className="px-4 py-2 border-t dark:border-gray-800">
-                            <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">Pilih Tanggal Export:</p>
-                            <div className="space-y-2">
-                                <input
-                                    type="date"
-                                    className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
-                                    value={dates.transactions.startDate}
-                                    onChange={(e) => setDates({
-                                        ...dates,
-                                        transactions: { ...dates.transactions, startDate: e.target.value }
-                                    })}
-                                />
-                                <input
-                                    type="date"
-                                    className="w-full text-sm rounded-lg border dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-200"
-                                    value={dates.transactions.endDate}
-                                    onChange={(e) => setDates({
-                                        ...dates,
-                                        transactions: { ...dates.transactions, endDate: e.target.value }
-                                    })}
-                                />
-                                <button
-                                    onClick={() => handleExport('custom')}
-                                    className="w-full px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                >
-                                    Export Custom
-                                </button>
-                            </div>
-                        </div>
-                    </Menu.Items>
-                </Menu>
+                        </Menu.Items>
+                    </Menu>
+                </div>
             </div>
 
             <div className='grid grid-cols-12 gap-4 px-4 lg:px-0'>
@@ -619,8 +687,12 @@ export default function Dashboard({ auth }) {
                                                             {user.avatar ? (
                                                                 <img 
                                                                     src={user.avatar} 
-                                                                    alt={user.name}
+                                                                    alt={user.name} 
                                                                     className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        e.target.onerror = null;
+                                                                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&bold=true`;
+                                                                    }}
                                                                 />
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center">

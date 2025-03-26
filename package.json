@@ -25,7 +25,10 @@
         "caniuse-lite": "^1.0.30001701",
         "chart.js": "^4.4.2",
         "clsx": "^2.1.1",
+        "date-fns": "^4.1.0",
         "react-chartjs-2": "^5.2.0",
+        "react-date-range": "^2.0.1",
+        "react-datepicker": "^8.2.1",
         "react-hot-toast": "^2.4.1",
         "react-quill": "^2.0.0",
         "sweetalert2": "^11.10.7"
