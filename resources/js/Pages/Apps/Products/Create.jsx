@@ -58,7 +58,7 @@ export default function Create() {
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Kolom Informasi Produk/Jasa */}
-                        <div className="border border-purple-300 rounded-md p-4">
+                        <div className="border border-purple-300 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 font-verdana">
                                 Informasi Produk/Jasa
                             </h2>
@@ -97,7 +97,7 @@ export default function Create() {
                                 <textarea
                                     value={data.deskripsi_produk}
                                     onChange={(e) => setData("deskripsi_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-32"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-[114px]"
                                     placeholder="Masukkan deskripsi produk/jasa"
                                 />
                                 <InputError message={errors.deskripsi_produk} className="mt-2" />
@@ -107,7 +107,7 @@ export default function Create() {
                         {/* Kolom Foto Produk/Jasa */}
                         <div className="border border-purple-500 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 mb-2">Foto Produk/Jasa</h2>
-                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
+                            <div className="relative w-full h-80 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
                                 <input
                                     type="file"
                                     onChange={handleImageChange}
