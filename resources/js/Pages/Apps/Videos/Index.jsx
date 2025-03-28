@@ -165,7 +165,7 @@ export default function Index({ videos, flash }) {
                 {hasAnyPermission(["videos-create"]) && (
                     <Link
                         href="/apps/videos/create"
-                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition"
+                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-purple-700 transition"
                     >
                         Tambah Video
                     </Link>

@@ -115,12 +115,12 @@ export default function Create() {
                         </div>
 
                         {/* File Video section */}
-                        <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border border-[#D4A8EF]">
-                            <div className="flex flex-col gap-2">
-                            <label className="text-2xl font-semibold text-gray-900">
-                                        Thumbnail Video
-                                    </label>
-                                <div className="border-2 border-dashed border-[#D4A8EF] dark:border-gray-800 rounded-lg p-4 text-center">
+                        <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border border-[#D4A8EF] flex flex-col h-full">
+                            <div className="flex flex-col gap-2 h-full">
+                                <label className="text-2xl font-semibold text-gray-900">
+                                    Thumbnail Video
+                                </label>
+                                <div className="border-2 border-dashed border-[#D4A8EF] dark:border-gray-800 rounded-lg p-4 text-center flex-1 flex flex-col">
                                     <input
                                         type="file"
                                         onChange={handleFileChange}
@@ -130,35 +130,35 @@ export default function Create() {
                                     />
                                     <label
                                         htmlFor="video-upload"
-                                        className="cursor-pointer flex flex-col items-center justify-center min-h-[200px]"
+                                        className="cursor-pointer flex flex-col items-center justify-center h-full"
                                     >
                                         {previewVideo ? (
-                                            <video controls className="w-full h-auto rounded-lg">
+                                            <video controls className="w-full h-full rounded-lg object-cover">
                                                 <source src={previewVideo} type="video/mp4" />
                                                 Browser tidak mendukung video.
                                             </video>
                                         ) : (
                                             <>
                                                 <svg 
-                                                        className="mx-auto h-20 w-20 text-gray-900" 
-                                                        stroke="currentColor" 
-                                                        fill="none" 
-                                                        viewBox="0 0 48 48" 
-                                                        aria-hidden="true"
-                                                    >
-                                                        <path 
-                                                            strokeLinecap="round" 
-                                                            strokeLinejoin="round" 
-                                                            strokeWidth={2} 
-                                                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                                        />
-                                                    </svg>
+                                                    className="mx-auto h-20 w-20 text-gray-900" 
+                                                    stroke="currentColor" 
+                                                    fill="none" 
+                                                    viewBox="0 0 48 48" 
+                                                    aria-hidden="true"
+                                                >
+                                                    <path 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round" 
+                                                        strokeWidth={2} 
+                                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                    />
+                                                </svg>
                                                 <span className="mt-2 text-sm text-gray-900">drag video or search computer</span>
                                             </>
                                         )}
                                     </label>
-                                    <InputError message={errors.video_file} className="mt-2" />
                                 </div>
+                                <InputError message={errors.video_file} className="mt-2" />
                             </div>
                         </div>
                     </div>
