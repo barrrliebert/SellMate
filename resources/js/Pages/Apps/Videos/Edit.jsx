@@ -5,6 +5,7 @@ import { IconVideo, IconChevronLeft } from '@tabler/icons-react';
 import InputError from '@/Components/InputError';
 import Input from '@/Components/Input';
 import Button from '@/Components/Button';
+import toast from 'react-hot-toast';
 
 export default function Edit({ video }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -19,7 +20,17 @@ export default function Edit({ video }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(`/apps/videos/${video.id}`);
+        const loadingToast = toast.loading('Sedang memperbarui video...');
+        post(`/apps/videos/${video.id}`, {
+            onSuccess: () => {
+                toast.dismiss(loadingToast);
+                toast.success('Video berhasil diperbarui!');
+            },
+            onError: () => {
+                toast.dismiss(loadingToast);
+                toast.error('Gagal memperbarui video. Silakan coba lagi.');
+            }
+        });
     };
 
     const handleFileChange = (e) => {

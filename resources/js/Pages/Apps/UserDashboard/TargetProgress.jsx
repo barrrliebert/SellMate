@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { IconTarget } from '@tabler/icons-react';
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
 
@@ -32,15 +31,19 @@ export default function TargetProgress() {
         <Link href={route('apps.user.target')}>
             <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-md p-5">
                 <div className="flex gap-4">
-                    <div className="p-2 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 h-fit">
-                        <IconTarget size={50} strokeWidth={1.5} />
+                    <div className="p-2 rounded-full bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-200 h-fit">
+                        <img 
+                            src="/images/target.svg" 
+                            alt="Target Icon" 
+                            className="w-[50px] h-[50px]"
+                        />
                     </div>
                     
                     <div className="flex-1">
                         <div className="flex justify-between items-center mb-2">
                             <div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                    Total Omzet
+                                <div className="text-sm text-gray-800 dark:text-gray-400">
+                                    Target Omzet
                                 </div>
                             </div>
                             <div className="text-sm font-bold text-gray-900 dark:text-gray-100">

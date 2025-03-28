@@ -8,6 +8,7 @@ import Button from "@/Components/Button";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "react-quill/dist/quill.bubble.css"; // Tambahkan jika ingin mode minimalis
+import toast from "react-hot-toast";
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -22,7 +23,17 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post("/apps/articles");
+        const loadingToast = toast.loading('Sedang menyimpan artikel...');
+        post('/apps/articles', {
+            onSuccess: () => {
+                toast.dismiss(loadingToast);
+                toast.success('Artikel berhasil ditambahkan!');
+            },
+            onError: () => {
+                toast.dismiss(loadingToast);
+                toast.error('Gagal menambahkan artikel. Silakan coba lagi.');
+            }
+        });
     };
 
     const handleThumbnailChange = (e) => {

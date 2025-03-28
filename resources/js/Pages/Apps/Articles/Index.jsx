@@ -7,6 +7,19 @@ import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { Toaster } from 'react-hot-toast';
 
+// Fungsi untuk memformat tanggal
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const year = date.getFullYear().toString().slice(-2);
+    const months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const month = months[date.getMonth()];
+    return `${day} ${month} ${year}`;
+};
+
 export default function Index({ articles, flash }) {
     useEffect(() => {
         if (flash && flash.success) {
@@ -108,21 +121,29 @@ export default function Index({ articles, flash }) {
                                 )}
                             </div>
                             
-                            <h3 className="font-semibold text-lg mb-2 text-left text-gray-900 dark:text-white">
-                                {article.title}
-                            </h3>
+                            <Link href={`/apps/articles/${article.slug}`} className="group cursor-pointer">
+                                <h3 className="font-semibold text-lg mb-3 text-left text-gray-900 dark:text-white line-clamp-2 group-hover:text-[#AA51DF] transition-colors">
+                                    {article.title}
+                                </h3>
+                                
+                                <div className="flex items-center space-x-3 mb-2">
+                                    <div className="w-8 h-8 rounded-full bg-[#D4A8EF] flex items-center justify-center">
+                                        <span className="text-white text-sm font-medium">
+                                            {article.author ? article.author.charAt(0).toUpperCase() : 'U'}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium text-gray-900 group-hover:text-[#AA51DF] transition-colors">
+                                            {article.author}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
                             
-                            <span className="block text-sm text-gray-800 dark:text-gray-400 mb-2">
-                                {article.author}
-                            </span>
-                            
-                            <div className="flex justify-between items-center">
-                                <Link
-                                    href={`/apps/articles/${article.slug}`}
-                                    className="text-indigo-600 dark:text-indigo-400 text-sm underline"
-                                >
-                                    Baca Selengkapnya
-                                </Link>
+                            <div className="flex justify-between items-center mt-auto">
+                                <span className="text-xs text-gray-700">
+                                    Posted {formatDate(article.created_at)}
+                                </span>
                                 
                                 <div className="flex gap-1">
                                     {hasAnyPermission(['articles-delete']) && (
@@ -130,7 +151,11 @@ export default function Index({ articles, flash }) {
                                             onClick={() => handleDelete(article.slug)}
                                             className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
                                         >
-                                            <IconTrash size={20} />
+                                            <img 
+                                            src="/images/delete.svg" 
+                                            alt="Delete Icon" 
+                                            className="w-[26] h-[26px]"
+                                            />
                                         </button>
                                     )}
                                     {hasAnyPermission(['articles-update']) && (
@@ -138,7 +163,11 @@ export default function Index({ articles, flash }) {
                                             onClick={() => handleEdit(article.slug)}
                                             className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
                                         >
-                                            <IconEdit size={20} />
+                                            <img 
+                                            src="/images/edit.svg" 
+                                            alt="Edit Icon" 
+                                            className="w-[26px] h-[26px]"
+                                            />
                                         </button>
                                     )}
                                 </div>

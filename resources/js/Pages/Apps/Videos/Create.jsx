@@ -4,6 +4,7 @@ import { Head, useForm, Link } from '@inertiajs/react';
 import { IconVideo, IconChevronLeft } from '@tabler/icons-react';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
+import toast from 'react-hot-toast';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -17,7 +18,17 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/apps/videos');
+        const loadingToast = toast.loading('Sedang menyimpan video...');
+        post('/apps/videos', {
+            onSuccess: () => {
+                toast.dismiss(loadingToast);
+                toast.success('Video berhasil ditambahkan!');
+            },
+            onError: () => {
+                toast.dismiss(loadingToast);
+                toast.error('Gagal menambahkan video. Silakan coba lagi.');
+            }
+        });
     };
 
     const handleFileChange = (e) => {

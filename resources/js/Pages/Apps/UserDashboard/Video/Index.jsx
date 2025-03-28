@@ -9,6 +9,9 @@ export default function Index({ videos }) {
     const [durations, setDurations] = useState({});
     const [loadingThumbnails, setLoadingThumbnails] = useState({});
     const [shareMenuOpen, setShareMenuOpen] = useState(null);
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredVideos, setFilteredVideos] = useState(videos);
     const [availableApps, setAvailableApps] = useState({
         facebook: true,
         twitter: true,
@@ -181,6 +184,28 @@ export default function Index({ videos }) {
         });
     }, [videos]);
 
+    // Add search functionality
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setFilteredVideos(videos);
+            return;
+        }
+
+        const filtered = videos.filter(video => 
+            video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            video.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredVideos(filtered);
+    }, [searchQuery, videos]);
+
+    // Add handleSearchToggle
+    const handleSearchToggle = () => {
+        setShowSearch(!showSearch);
+        if (showSearch) {
+            setSearchQuery('');
+        }
+    };
+
     return (
         <>
             <Head title="Videos" />
@@ -197,18 +222,44 @@ export default function Index({ videos }) {
                             >
                                 <IconChevronLeft size={24} strokeWidth={1.5} />
                             </Link>
-                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                                Videos
-                            </h1>
+                            {!showSearch && (
+                                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                                    Videos
+                                </h1>
+                            )}
                         </div>
-                        <button className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
-                            <IconSearch size={24} strokeWidth={1.5} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {showSearch ? (
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Cari video..."
+                                        className="w-[300px] py-2 px-4 pr-10 block rounded-lg text-sm border-2 border-[#D4A8EF] focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white focus:border-[#D4A8EF] dark:focus:ring-gray-500 dark:focus:border-[#D4A8EF] dark:text-gray-200 dark:bg-gray-950 dark:border-[#D4A8EF]"
+                                        autoFocus
+                                    />
+                                    <button 
+                                        onClick={handleSearchToggle}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        <IconX size={20} strokeWidth={1.5} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button 
+                                    onClick={handleSearchToggle}
+                                    className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                                >
+                                    <IconSearch size={24} strokeWidth={1.5} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Video Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {videos.map((video) => (
+                        {filteredVideos.map((video) => (
                             <div key={video.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
                                 <Link href={route('apps.user.video.show', video.slug || video.id)}>
                                     <div className="relative aspect-video bg-gray-100 dark:bg-gray-900">

@@ -64,23 +64,19 @@ export default function Index({ products, flash }) {
 
     return (
         <>
-            <Head title="Products" />
+            <Head title="Katalog Produk" />
             <Toaster position="top-right" />
 
             {/* Header Katalog Produk */}
-            <div className="mx-6 flex flex-col">
-                <div className="mb-2">
-                    <h1 className="text-3xl font-bold mb-2 text-black">
-                        Katalog Produk
-                    </h1>
-                    <p className="text-sm text-gray-600">
-                        Kelola produk unggulan tefa dengan mudah
-                    </p>
+            <div className="flex justify-between items-center mb-10">
+                <div className="flex flex-col">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Katalog Produk</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Kelola produk unggulan tefa dengan mudah</p>
                 </div>
                 {hasAnyPermission(["products-create"]) && (
                     <Link
                         href="/apps/products/create"
-                        className="bg-purple-300 mb-3 text-white px-4 py-2 rounded-lg hover:bg-purple-400 transition self-end"
+                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-purple-700 transition"
                     >
                         Tambah Produk
                     </Link>
@@ -88,10 +84,10 @@ export default function Index({ products, flash }) {
             </div>
 
             {/* Daftar Produk */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {products.data.map((product) => (
                     <div key={product.id} className="w-[270px] h-[377px]">
-                        <div className="bg-white border border-purple-300 rounded-2xl p-4 sm:p-4 flex flex-col h-full">
+                        <div className="bg-white border-2 border-[#D4A8EF] rounded-2xl p-4 sm:p-4 flex flex-col h-full">
                             
                             {/* Gambar Produk */}
                             <div className="mb-2 rounded-xl overflow-hidden w-full h-48 sm:h-52">
@@ -140,13 +136,17 @@ export default function Index({ products, flash }) {
                             </div>
 
                             {/* Tombol Aksi */}
-                            <div className="flex justify-end gap-2 mt-3">
+                            <div className="flex justify-end gap-1 mt-3">
                                 {hasAnyPermission(["products-delete"]) && (
                                     <button
                                         onClick={() => handleDelete(product.id)}
                                         className="text-red-600 p-1.5 rounded-lg hover:text-white hover:bg-red-600 transition transform hover:scale-105"
                                     >
-                                        <IconTrash size={20} />
+                                        <img 
+                                        src="/images/delete.svg" 
+                                        alt="Delete Icon" 
+                                        className="w-[26px] h-[26px]"
+                                    />
                                     </button>
                                 )}
                                 {hasAnyPermission(["products-update"]) && (
@@ -154,7 +154,11 @@ export default function Index({ products, flash }) {
                                         href={`/apps/products/${product.id}/edit`}
                                         className="text-gray-900 p-1.5 rounded-lg hover:bg-yellow-600 transition transform hover:scale-105"
                                     >
-                                        <IconEdit size={20} />
+                                        <img 
+                                        src="/images/edit.svg" 
+                                        alt="Edit Icon" 
+                                        className="w-[26px] h-[26px]"
+                                    />
                                     </Link>
                                 )}
                             </div>

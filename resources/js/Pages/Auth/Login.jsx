@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Checkbox from '@/Components/Checkbox';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function Login({ status, canResetPassword }) {
+    const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -90,18 +92,31 @@ export default function Login({ status, canResetPassword }) {
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                     Password
                                 </label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    value={data.password}
-                                    className={`mt-1 block w-full border rounded-md p-2 ${
-                                        errors.password ? 'border-red-500' : 'border-orange-200'
-                                    }`}
-                                    placeholder="e.g Johan12@*"
-                                    autoComplete="current-password"
-                                    onChange={(e) => setData('password', e.target.value)}
-                                />
+                                <div className="relative">
+                                    <input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        value={data.password}
+                                        className={`mt-1 block w-full border rounded-md p-2 ${
+                                            errors.password ? 'border-red-500' : 'border-orange-200'
+                                        }`}
+                                        placeholder="e.g Johan12@*"
+                                        autoComplete="current-password"
+                                        onChange={(e) => setData('password', e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showPassword ? (
+                                            <IconEyeOff size={20} strokeWidth={1.5} />
+                                        ) : (
+                                            <IconEye size={20} strokeWidth={1.5} />
+                                        )}
+                                    </button>
+                                </div>
                                 {errors.password && (
                                     <div className="mt-2 text-sm text-red-600">
                                         {errors.password}

@@ -630,7 +630,7 @@ export default function Detail({ type }) {
                                 }`}
                             >
                                 {/* First Slide - Date/Week */}
-                                <div className="w-full flex-shrink-0">
+                                <div className="w-full flex-shrink-0 px-2">
                                     <div className="bg-white rounded-full flex items-center h-[30px] relative border border-[#EDA375] max-w-[382px] mx-auto overflow-hidden">
                                         <button 
                                             onClick={() => {
@@ -788,18 +788,26 @@ export default function Detail({ type }) {
                 <div className="fixed bottom-6 right-6 z-50">
                     <div className="relative">
                         {/* Speed Dial Options */}
-                        <div className={`absolute bottom-full right-0 mb-4 space-y-2 transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                                                <div className={`absolute bottom-full right-0 mb-4 space-y-2 transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                             <Link
                                 href="/apps/user-dashboard/target/edit"
                                 className="flex items-center gap-2 bg-purple-700 text-white p-2.5 rounded-full shadow-lg hover:bg-purple-800 transition-colors"
                             >
-                                <IconTarget size={32} />
+                                <img 
+                                src="/images/target-button.svg" 
+                                alt="Target Icon" 
+                                className="w-8 h-8" 
+                            />
                             </Link>
                             <Link
                                 href="/apps/user-dashboard/omzet"
                                 className="flex items-center gap-2 bg-purple-700 text-white p-2.5 rounded-full shadow-lg hover:bg-purple-800 transition-colors"
                             >
-                                <IconCoin size={32} />
+                                <img 
+                                src="/images/add-omzet.svg" 
+                                alt="Omzet Icon" 
+                                className="w-8 h-8" 
+                            />
                             </Link>
                         </div>
 

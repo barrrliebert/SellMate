@@ -53,7 +53,8 @@ class OmzetController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('major', 'like', '%' . $search . '%');
             });
         }
 
@@ -201,7 +202,8 @@ class OmzetController extends Controller
         if ($request->has('search') && $isAdmin) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('major', 'like', '%' . $search . '%');
             });
         }
 

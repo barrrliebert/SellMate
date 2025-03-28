@@ -227,7 +227,11 @@ export default function Index({ videos, flash }) {
                                     onClick={() => handleEdit(video.id)}
                                     className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
                                 >
-                                    <IconEdit size={20} />
+                                    <img 
+                                        src="/images/edit.svg" 
+                                        alt="Edit Icon" 
+                                        className="w-[26px] h-[26px]"
+                                    />
                                 </button>
                             )}
 
@@ -237,7 +241,11 @@ export default function Index({ videos, flash }) {
                                     onClick={() => handleDelete(video.id)}
                                     className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
                                 >
-                                    <IconTrash size={20} />
+                                    <img 
+                                        src="/images/delete.svg" 
+                                        alt="Delete Icon" 
+                                        className="w-[26] h-[26px]"
+                                    />
                                 </button>
                             )}
                         </div>

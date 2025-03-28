@@ -4,7 +4,7 @@ import { Head, useForm, router } from '@inertiajs/react';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
 import { IconPhoto } from '@tabler/icons-react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
@@ -20,21 +20,16 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        const loadingToast = toast.loading('Menyimpan produk...');
-
-        post('/apps/products', data, {
+        const loadingToast = toast.loading('Sedang menyimpan data produk...');
+        post('/apps/products', {
             onSuccess: () => {
                 toast.dismiss(loadingToast);
-                // Delay before redirect to show success message
-                setTimeout(() => {
-                    toast.success('Produk berhasil ditambahkan!');
-                    router.visit('/apps/products');
-                }, 1000);
+                toast.success('Produk berhasil ditambahkan!');
+                router.visit('/apps/products');
             },
             onError: () => {
                 toast.dismiss(loadingToast);
-                toast.error('Gagal menambahkan produk!');
+                toast.error('Gagal menambahkan produk. Silakan coba lagi.');
             }
         });
     };
@@ -54,7 +49,6 @@ export default function Create() {
     return (
         <>
             <Head title="Tambah Produk" />
-            <Toaster position="top-right" />
             <div className="max-w-2xl mx-auto mt-2">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">
                     Tambah Produk Unggulan Tefa
@@ -64,7 +58,7 @@ export default function Create() {
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Kolom Informasi Produk/Jasa */}
-                        <div className="border border-purple-300 rounded-md p-4">
+                        <div className="border border-purple-300 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 font-verdana">
                                 Informasi Produk/Jasa
                             </h2>
@@ -103,7 +97,7 @@ export default function Create() {
                                 <textarea
                                     value={data.deskripsi_produk}
                                     onChange={(e) => setData("deskripsi_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-32"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-900 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-[114px]"
                                     placeholder="Masukkan deskripsi produk/jasa"
                                 />
                                 <InputError message={errors.deskripsi_produk} className="mt-2" />
@@ -113,7 +107,7 @@ export default function Create() {
                         {/* Kolom Foto Produk/Jasa */}
                         <div className="border border-purple-500 rounded-md p-4 self-start">
                             <h2 className="text-xl font-bold text-gray-900 mb-2">Foto Produk/Jasa</h2>
-                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
+                            <div className="relative w-full h-80 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
                                 <input
                                     type="file"
                                     onChange={handleImageChange}

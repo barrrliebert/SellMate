@@ -20,6 +20,8 @@ export default function Dashboard({ auth }) {
     const [exportLoading, setExportLoading] = useState(false);
     const [searchTopUsers, setSearchTopUsers] = useState('');
     const [searchTransactions, setSearchTransactions] = useState('');
+    const [actualSearchTopUsers, setActualSearchTopUsers] = useState('');
+    const [actualSearchTransactions, setActualSearchTransactions] = useState('');
     const [topUsers, setTopUsers] = useState({ data: [], total: 0, per_page: 6, current_page: 1 });
     const [transactions, setTransactions] = useState({ data: [], total: 0, per_page: 10, current_page: 1 });
     const [filters, setFilters] = useState({
@@ -60,20 +62,16 @@ export default function Dashboard({ auth }) {
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, searchTopUsers, searchTransactions]);
+    }, [currentPage, actualSearchTopUsers, actualSearchTransactions]);
 
-    // Watch for search changes
+    // Watch for actual search term changes instead of input changes
     useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchData(searchTopUsers, searchTransactions);
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [searchTopUsers, searchTransactions]);
+        fetchData(actualSearchTopUsers, actualSearchTransactions);
+    }, [actualSearchTopUsers, actualSearchTransactions]);
 
     // Add new useEffect to watch filter changes
     useEffect(() => {
-        fetchData(searchTopUsers, searchTransactions);
+        fetchData(actualSearchTopUsers, actualSearchTransactions);
     }, [filters.topUsers, filters.transactions]);
 
     // Close date picker when clicking outside
@@ -97,7 +95,7 @@ export default function Dashboard({ auth }) {
                 [table]: type
             }));
             // Langsung fetch data untuk filter non-custom
-            fetchData(searchTopUsers, searchTransactions, {
+            fetchData(actualSearchTopUsers, actualSearchTransactions, {
                 ...filters,
                 [table]: type
             }, dates);
@@ -127,7 +125,7 @@ export default function Dashboard({ auth }) {
                 [table]: customDates
             }));
             // Fetch data with new filter and dates
-            fetchData(searchTopUsers, searchTransactions, {
+            fetchData(actualSearchTopUsers, actualSearchTransactions, {
                 ...filters,
                 [table]: 'custom'
             }, {
@@ -506,6 +504,20 @@ export default function Dashboard({ auth }) {
         return pages;
     };
 
+    const handleSearch = (type) => {
+        if (type === 'topUsers') {
+            setActualSearchTopUsers(searchTopUsers);
+        } else {
+            setActualSearchTransactions(searchTransactions);
+        }
+    };
+
+    const handleKeyPress = (e, type) => {
+        if (e.key === 'Enter') {
+            handleSearch(type);
+        }
+    };
+
     return (
         <>
             <Head title='Dashboard'/>
@@ -613,20 +625,17 @@ export default function Dashboard({ auth }) {
                     <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-4'>
                         <Widget
                             title={'Total Omzet'}
-                            color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
-                            icon={<IconWallet size={'20'} strokeWidth={'1.5'}/>}
+                            icon={<img src="/images/transaksi.svg" width="28" height="28" alt="Transaksi icon" />}
                             total={loading ? 'Loading...' : totalOmzet}
                         />
                 <Widget
                             title={'Produk Tefa'}
-                    color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
-                    icon={<IconBox size={'20'} strokeWidth={'1.5'}/>}
+                            icon={<img src="/images/product-admin.svg" width="28" height="28" alt="Product icon" />}
                             total={loading ? 'Loading...' : `${totalProducts} Produk`}
                 />
                 <Widget
                             title={'Total User'}
-                    color={'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'}
-                    icon={<IconUsers size={'20'} strokeWidth={'1.5'}/>}
+                            icon={<img src="/images/user.svg" width="28" height="28" alt="User icon" />}
                             total={loading ? 'Loading...' : `${totalUsers} User `}
                 />
             </div>
@@ -641,12 +650,16 @@ export default function Dashboard({ auth }) {
                                         type="text"
                                         value={searchTopUsers}
                                         onChange={(e) => setSearchTopUsers(e.target.value)}
-                                        placeholder="Cari berdasarkan nama..."
+                                        onKeyPress={(e) => handleKeyPress(e, 'topUsers')}
+                                        placeholder="Cari nama/jurusan..."
                                         className="py-2 px-4 pr-11 block w-full rounded-lg text-sm border-2 border-[#D4A8EF] focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white focus:border-[#D4A8EF] dark:focus:ring-gray-500 dark:focus:border-[#D4A8EF] dark:text-gray-200 dark:bg-gray-950 dark:border-[#D4A8EF]"
                                     />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none pr-4">
-                                        <IconSearch className="text-gray-500 w-5 h-5"/>
-                                    </div>
+                                    <button 
+                                        onClick={() => handleSearch('topUsers')}
+                                        className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    >
+                                        <IconSearch className="w-5 h-5"/>
+                                    </button>
                                 </div>
                                 <FilterDropdown 
                                     table="topUsers"
@@ -757,12 +770,16 @@ export default function Dashboard({ auth }) {
                                         type="text"
                                         value={searchTransactions}
                                         onChange={(e) => setSearchTransactions(e.target.value)}
-                                        placeholder="Cari berdasarkan nama..."
+                                        onKeyPress={(e) => handleKeyPress(e, 'transactions')}
+                                        placeholder="Cari nama/jurusan..."
                                         className="py-2 px-4 pr-11 block w-full rounded-lg text-sm border-2 border-[#D4A8EF] focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white focus:border-[#D4A8EF] dark:focus:ring-gray-500 dark:focus:border-[#D4A8EF] dark:text-gray-200 dark:bg-gray-950 dark:border-[#D4A8EF]"
                                     />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none pr-4">
-                                        <IconSearch className="text-gray-500 w-5 h-5"/>
-                                    </div>
+                                    <button 
+                                        onClick={() => handleSearch('transactions')}
+                                        className="absolute inset-y-0 right-0 flex items-center px-4 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    >
+                                        <IconSearch className="w-5 h-5"/>
+                                    </button>
                                 </div>
                                 <FilterDropdown 
                                     table="transactions"

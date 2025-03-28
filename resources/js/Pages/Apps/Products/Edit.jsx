@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { IconPhoto } from '@tabler/icons-react';
 import InputError from '@/Components/InputError';
 import Button from '@/Components/Button';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 export default function Edit({ product }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -21,21 +21,15 @@ export default function Edit({ product }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        const loadingToast = toast.loading('Memperbarui produk...');
-
-        post(`/apps/products/${product.id}`, data, {
+        const loadingToast = toast.loading('Sedang menyimpan data produk...');
+        post(`/apps/products/${product.id}`, {
             onSuccess: () => {
                 toast.dismiss(loadingToast);
-                // Delay before redirect to show success message
-                setTimeout(() => {
-                    toast.success('Produk berhasil diperbarui!');
-                    router.visit('/apps/products');
-                }, 1000);
+                toast.success('Produk berhasil diubah!');
             },
             onError: () => {
                 toast.dismiss(loadingToast);
-                toast.error('Gagal memperbarui produk!');
+                toast.error('Gagal mengubah produk. Silakan coba lagi.');
             }
         });
     };
@@ -55,7 +49,6 @@ export default function Edit({ product }) {
     return (
         <>
             <Head title="Edit Produk" />
-            <Toaster position="top-right" />
             <div className="max-w-2xl mx-auto mt-6">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">
                     Edit Produk Unggulan Tefa
@@ -106,7 +99,7 @@ export default function Edit({ product }) {
                                 <textarea
                                     value={data.deskripsi_produk}
                                     onChange={(e) => setData("deskripsi_produk", e.target.value)}
-                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto h-32"
+                                    className="w-full p-3 border text-xs rounded-md focus:outline-none focus:ring-0 bg-white text-gray-600 focus:border-gray-400 border-gray-700 dark:bg-gray-900 dark:text-gray-300 resize-none overflow-y-auto  h-[114px]"
                                     placeholder="Masukkan deskripsi produk/jasa"
                                 />
                                 <InputError message={errors.deskripsi_produk} className="mt-2" />
@@ -118,7 +111,7 @@ export default function Edit({ product }) {
                             <h2 className="text-xl font-bold text-gray-900 mb-2">
                                 Foto Produk/Jasa
                             </h2>
-                            <div className="relative w-full h-72 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
+                            <div className="relative w-full h-80 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center hover:border-purple-500 transition-colors duration-300 cursor-pointer">
                                 <input
                                     type="file"
                                     onChange={handleImageChange}

@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function Register() {
+    const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         school: '',
@@ -132,17 +134,30 @@ export default function Register() {
                                         <label className="block text-sm font-medium text-black mb-1">
                                             Password
                                         </label>
-                                        <TextInput
-                                            id="password"
-                                            type="password"
-                                            name="password"
-                                            value={data.password}
-                                            className="w-full border border-orange-200 rounded-xl p-3 text-sm bg-white"
-                                            placeholder="e.g johan12@*"
-                                            autoComplete="new-password"
-                                            onChange={(e) => setData('password', e.target.value)}
-                                            required
-                                        />
+                                        <div className="relative">
+                                            <TextInput
+                                                id="password"
+                                                type={showPassword ? "text" : "password"}
+                                                name="password"
+                                                value={data.password}
+                                                className="w-full border border-orange-200 rounded-xl p-3 text-sm bg-white"
+                                                placeholder="e.g johan12@*"
+                                                autoComplete="new-password"
+                                                onChange={(e) => setData('password', e.target.value)}
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                            >
+                                                {showPassword ? (
+                                                    <IconEyeOff size={20} strokeWidth={1.5} />
+                                                ) : (
+                                                    <IconEye size={20} strokeWidth={1.5} />
+                                                )}
+                                            </button>
+                                        </div>
                                         <InputError message={errors.password} className="mt-2" />
                                     </div>
                                 </div>

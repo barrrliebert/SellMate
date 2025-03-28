@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
+import { IconEye, IconEyeOff } from '@tabler/icons-react';
 
 export default function Login({ status }) {
+    const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -70,16 +72,29 @@ export default function Login({ status }) {
                                     <label htmlFor="password" className="block text-white mb-1 text-sm">
                                         Password
                                     </label>
-                                    <input
-                                        id="password"
-                                        type="password"
-                                        name="password"
-                                        value={data.password}
-                                        className="w-full p-2 rounded-lg text-gray-700 text-sm"
-                                        placeholder="e.g Johan12@*"
-                                        autoComplete="current-password"
-                                        onChange={(e) => setData('password', e.target.value)}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            name="password"
+                                            value={data.password}
+                                            className="w-full p-2 rounded-lg text-gray-700 text-sm"
+                                            placeholder="e.g Johan12@*"
+                                            autoComplete="current-password"
+                                            onChange={(e) => setData('password', e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                        >
+                                            {showPassword ? (
+                                                <IconEyeOff size={20} strokeWidth={1.5} />
+                                            ) : (
+                                                <IconEye size={20} strokeWidth={1.5} />
+                                            )}
+                                        </button>
+                                    </div>
                                     {errors.password && (
                                         <div className="mt-1 text-xs text-red-200">
                                             {errors.password}

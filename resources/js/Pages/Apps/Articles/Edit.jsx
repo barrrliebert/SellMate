@@ -7,6 +7,7 @@ import Input from "@/Components/Input";
 import Button from "@/Components/Button";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 export default function Edit({ article }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -24,7 +25,17 @@ export default function Edit({ article }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(`/apps/articles/${article.slug}`);
+        const loadingToast = toast.loading('Sedang memperbarui artikel...');
+        post(`/apps/articles/${article.slug}`, {
+            onSuccess: () => {
+                toast.dismiss(loadingToast);
+                toast.success('Artikel berhasil diperbarui!');
+            },
+            onError: () => {
+                toast.dismiss(loadingToast);
+                toast.error('Gagal memperbarui artikel. Silakan coba lagi.');
+            }
+        });
     };
 
     const handleThumbnailChange = (e) => {
