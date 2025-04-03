@@ -67,9 +67,9 @@ class ArticleController extends Controller
     }
 
     // Menampilkan detail artikel
-    public function show($id)
+    public function show($slug)
     {
-        $article = $this->repository->findById($id);
+        $article = $this->repository->findBySlug($slug);
 
         if (!$article) {
             return redirect()->route('apps.articles.index')->with('error', 'Article not found.');

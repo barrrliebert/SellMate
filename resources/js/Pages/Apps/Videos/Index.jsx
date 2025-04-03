@@ -222,32 +222,32 @@ export default function Index({ videos, flash }) {
                             </button>
 
                             {/* Tombol Edit */}
-                            {hasAnyPermission(["videos-update"]) && (
-                                <button
-                                    onClick={() => handleEdit(video.id)}
-                                    className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
-                                >
-                                    <img 
-                                        src="/images/edit.svg" 
-                                        alt="Edit Icon" 
-                                        className="w-[26px] h-[26px]"
-                                    />
-                                </button>
-                            )}
-
-                            {/* Tombol Hapus */}
                             {hasAnyPermission(["videos-delete"]) && (
-                                <button
-                                    onClick={() => handleDelete(video.id)}
-                                    className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
-                                >
-                                    <img 
-                                        src="/images/delete.svg" 
-                                        alt="Delete Icon" 
-                                        className="w-[26] h-[26px]"
-                                    />
-                                </button>
-                            )}
+        <button
+            onClick={() => handleDelete(video.id)}
+            className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
+        >
+            <img 
+                src="/images/delete.svg" 
+                alt="Delete Icon" 
+                className="w-[26px] h-[26px]"
+            />
+        </button>
+    )}
+
+    {/* Tombol Edit */}
+    {hasAnyPermission(["videos-update"]) && (
+        <button
+            onClick={() => handleEdit(video.id)}
+            className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
+        >
+            <img 
+                src="/images/edit.svg" 
+                alt="Edit Icon" 
+                className="w-[26px] h-[26px]"
+            />
+        </button>
+    )}
                         </div>
                     </div>
                 ))}
