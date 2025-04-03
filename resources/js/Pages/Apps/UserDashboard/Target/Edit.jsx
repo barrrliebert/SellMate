@@ -142,7 +142,7 @@ useEffect(() => {
                             value={data.judul_target}
                             onChange={e => setData('judul_target', e.target.value)}
                             errors={errors.judul_target}
-                            className="border border-[#58177F] w-full h-[42px]"
+                            className="border-2 border-[#58177F66] focus:border-[#58177F] w-full h-[42px]"
                         />
                         <Input
                             type="date"
@@ -152,7 +152,7 @@ useEffect(() => {
                             onChange={e => setData('tanggal_target', e.target.value)}
                             errors={errors.tanggal_target}
                             icon={<IconCalendar size={26} />}
-                            className="border border-[#58177F] w-full h-[42px]"
+                            className="border-2 border-[#58177F66] focus:border-[#58177F] w-full h-[42px]"
                         />
                         
                         <div className="space-y-2">
@@ -173,7 +173,7 @@ useEffect(() => {
                                             }));
                                         }}
                                         errors={errors.min_target}
-                                        className="border border-[#58177F] w-full h-[40px]"
+                                        className="border-2 border-[#58177F66] focus:border-[#58177F] w-full h-[40px]"
                                     />
                                 </div>
                                 <div className="w-full max-w-[48%]">
@@ -191,7 +191,7 @@ useEffect(() => {
                                             }));
                                         }}
                                         errors={errors.max_target}
-                                        className="border border-[#58177F] w-full h-[40px]"
+                                        className="border-2 border-[#58177F66] focus:border-[#58177F] w-full h-[40px]"
                                     />
                                 </div>
                             </div>

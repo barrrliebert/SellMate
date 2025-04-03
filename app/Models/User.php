@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -57,8 +58,24 @@ class User extends Authenticatable
     protected function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value != null ? asset('/storage/avatars/' . $value) : asset('avatar.png'),
+            get: function ($value) {
+                if ($value) {
+                    return asset('/storage/avatars/' . $value);
+                }
+                
+                // Generate default avatar based on user name
+                $name = urlencode($this->name);
+                return "https://ui-avatars.com/api/?name={$name}&background=random&color=fff&bold=true&size=256";
+            },
         );
+    }
+
+    /**
+     * Get the raw avatar path without asset URL for manipulation
+     */
+    public function getAvatarPath()
+    {
+        return $this->getRawOriginal('avatar');
     }
 
     /**

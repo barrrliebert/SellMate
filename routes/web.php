@@ -87,10 +87,7 @@ Route::group(['prefix' => 'apps', 'as' => 'apps.' , 'middleware' => ['auth']], f
     Route::resource('/videos', VideoController::class)->except('show');
     // articles route
     Route::resource('/articles', ArticleController::class)->except('show');
-   
-    // Tambahkan route show secara manual
-    Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
-    
+    Route::get('/articles/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
 });
 
 require __DIR__.'/auth.php';

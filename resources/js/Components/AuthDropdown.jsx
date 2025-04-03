@@ -74,7 +74,7 @@ export default function AuthDropdown({auth, isMobile, toggleSidebar, isUserAcces
                 </div>
                 
                 <Menu className='relative z-10' as="div">
-                    <Menu.Button className={`flex items-center group bg-gray-200 rounded-full py-1 px-2 ${isUserAccess ? 'bg-opacity-75' : ''}`}>
+                    <Menu.Button className={`flex items-center group bg-white rounded-full py-1 px-2 ${isUserAccess ? 'bg-white' : ''}`}>
                         <div className="flex flex-col text-left mr-4 ml-2">
                             <span className={`text-xs ${isUserAccess ? 'text-gray-900' : ''}`}>{auth.user.name}</span>
                             <span className={`text-xs ${isUserAccess ? 'text-gray-900' : ''}`}>{auth.user.email}</span>

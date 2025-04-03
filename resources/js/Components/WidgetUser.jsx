@@ -16,10 +16,10 @@ export default function WidgetUser({
         {icon}
       </div>
       <div className="ml-4 flex flex-col">
-        <span className="font-semibold text-gray-900 dark:text-gray-200 text-sm">
+        <span className="font-semibold text-gray-600 text-sm">
           {title}
         </span>
-        <span className="whitespace-nowrap font-semibold text-base font-mono text-gray-900 dark:text-white text-xs">
+        <span className="whitespace-nowrap font-semibold font-mono text-gray-600 dark:text-white text-xs">
           {total}
         </span>
       </div>

@@ -123,7 +123,7 @@ export default function OmzetModal({ isOpen, onClose, product }) {
                                     label={<span className="text-black">Nama Produk/Jasa</span>}
                                     value={product?.nama_produk}
                                     readOnly
-                                    className="border border-[#DD661D66]"
+                                    className="!border !border-[#DD661D66]"
                                 />
                                 <div className="space-y-1">
                                     <QuantityInput
@@ -152,7 +152,7 @@ export default function OmzetModal({ isOpen, onClose, product }) {
                                     onChange={e => setData('tanggal', e.target.value)}
                                     errors={errors.tanggal}
                                     icon={<IconCalendar size={20} />}
-                                    className="border border-[#DD661D66]"
+                                    className="!border !border-[#DD661D66]"
                                 />
                             </div>
                         </div>

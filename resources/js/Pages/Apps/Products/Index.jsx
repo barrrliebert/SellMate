@@ -56,7 +56,8 @@ export default function Index({ products, flash }) {
 
     return (
         <>
-            <Head title="Products" />
+            <Head title="Katalog Produk" />
+            <Toaster position="top-right" />
 
             {/* Header Katalog Produk */}
             <div className="mx-6 flex flex-col">

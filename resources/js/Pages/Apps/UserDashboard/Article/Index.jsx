@@ -5,6 +5,9 @@ import toast, { Toaster } from 'react-hot-toast';
 
 export default function Index({ articles }) {
     const [shareMenuOpen, setShareMenuOpen] = useState(null);
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredArticles, setFilteredArticles] = useState(articles);
     const shareMenuRef = useRef(null);
     const [availableApps, setAvailableApps] = useState({
         facebook: true,
@@ -103,6 +106,28 @@ export default function Index({ articles }) {
         return new Date(dateString).toLocaleDateString('id-ID', options);
     };
 
+    // Add search functionality
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setFilteredArticles(articles);
+            return;
+        }
+
+        const filtered = articles.filter(article => 
+            article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            article.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredArticles(filtered);
+    }, [searchQuery, articles]);
+
+    // Add handleSearchToggle
+    const handleSearchToggle = () => {
+        setShowSearch(!showSearch);
+        if (showSearch) {
+            setSearchQuery('');
+        }
+    };
+
     return (
         <>
             <Head title="Articles" />
@@ -119,18 +144,44 @@ export default function Index({ articles }) {
                             >
                                 <IconChevronLeft size={24} strokeWidth={1.5} />
                             </Link>
-                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                                Artikel
-                            </h1>
+                            {!showSearch && (
+                                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                                    Artikel
+                                </h1>
+                            )}
                         </div>
-                        <button className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">
-                            <IconSearch size={24} strokeWidth={1.5} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {showSearch ? (
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Cari artikel..."
+                                        className="w-[300px] py-2 px-4 pr-10 block rounded-lg text-sm border-2 border-[#D4A8EF] focus:outline-none focus:ring-0 focus:ring-gray-400 text-gray-700 bg-white focus:border-[#D4A8EF] dark:focus:ring-gray-500 dark:focus:border-[#D4A8EF] dark:text-gray-200 dark:bg-gray-950 dark:border-[#D4A8EF]"
+                                        autoFocus
+                                    />
+                                    <button 
+                                        onClick={handleSearchToggle}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        <IconX size={20} strokeWidth={1.5} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button 
+                                    onClick={handleSearchToggle}
+                                    className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+                                >
+                                    <IconSearch size={24} strokeWidth={1.5} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Article Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {articles.map((article) => (
+                        {filteredArticles.map((article) => (
                             <div key={article.id} className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm">
                                 <div className="flex">
                                     {/* Thumbnail */}

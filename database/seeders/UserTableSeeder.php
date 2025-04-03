@@ -15,16 +15,22 @@ class UserTableSeeder extends Seeder
     public function run(): void
     {
         // get admin role
-        $role = Role::where('name', 'super-admin')->first();
+        $adminRole = Role::where('name', 'super-admin')->first();
+        $userRole = Role::where('name', 'users-access')->first();
 
         // create new admin
-        $user = User::create([
+        $admin = User::create([
             'name' => 'Akbar Tolib Ramadan',
             'email' => 'akbartolieb@gmail.com',
             'password' => bcrypt('rmdn123-'),
         ]);
 
-        // assign a role to user
-        $user->assignRole($role);
+        // assign admin role
+        $admin->assignRole($adminRole);
+
+        // Create 100 regular users
+        User::factory()->count(100)->create()->each(function ($user) use ($userRole) {
+            $user->assignRole($userRole);
+        });
     }
 }

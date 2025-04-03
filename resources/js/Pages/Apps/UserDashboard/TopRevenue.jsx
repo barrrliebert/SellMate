@@ -18,8 +18,13 @@ export default function TopRevenue() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('/apps/omzets/top-omzet');
-                setTopUsers(response.data.top_users.slice(0, 3));
+                const response = await axios.get('/apps/omzets/top-omzet', {
+                    params: {
+                        per_page: 3,
+                        page: 1
+                    }
+                });
+                setTopUsers(response.data.top_users.data);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -64,10 +69,16 @@ export default function TopRevenue() {
                                                 src={user.avatar} 
                                                 alt={user.name}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&bold=true`;
+                                                }}
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
-                                                <IconUser size={24} className="text-gray-400" />
+                                                <span className="text-white text-sm font-bold">
+                                                    {user.name.charAt(0).toUpperCase()}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
