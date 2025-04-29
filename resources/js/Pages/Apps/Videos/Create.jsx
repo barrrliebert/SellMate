@@ -168,7 +168,7 @@ export default function Create() {
                             type="submit"
                             label={processing ? 'Menyimpan...' : 'Simpan'}
                             disabled={processing}
-                            className="bg-[#AA51DF] hover:bg-indigo-700 disabled:opacity-50"
+                            className="bg-[#AA51DF] hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto"
                         />
                     </div>
                 </form>

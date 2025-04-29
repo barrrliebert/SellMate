@@ -16,18 +16,33 @@ class ArticleRepository
 
     public function getAll()
     {
-        return $this->model->all();
+        $articles = $this->model->all();
+        
+        // Fix thumbnail URLs for all articles
+        foreach ($articles as $article) {
+            if ($article->thumbnail && !str_starts_with($article->thumbnail, 'http')) {
+                $article->thumbnail = asset('storage/' . $article->thumbnail);
+            }
+        }
+        
+        return $articles;
     }
 
     public function findById($id)
     {
-        return $this->model->findOrFail($id);
+        $article = $this->model->findOrFail($id);
+        
+        // Fix thumbnail URL
+        if ($article->thumbnail && !str_starts_with($article->thumbnail, 'http')) {
+            $article->thumbnail = asset('storage/' . $article->thumbnail);
+        }
+        
+        return $article;
     }
 
     public function create(array $data)
     {
-      
-       if (isset($data['thumbnail'])) {
+        if (isset($data['thumbnail'])) {
             $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
         }
 
@@ -40,7 +55,9 @@ class ArticleRepository
 
         if (isset($data['thumbnail'])) {
             if ($article->thumbnail) {
-                Storage::delete($article->thumbnail);
+                // Dapatkan path relatif dari URL lengkap
+                $oldPath = str_replace(asset('storage/'), '', $article->getRawOriginal('thumbnail'));
+                Storage::disk('public')->delete($oldPath);
             }
             $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
         }
@@ -53,9 +70,10 @@ class ArticleRepository
     {
         $article = $this->findById($id);
 
-
         if ($article->thumbnail) {
-            Storage::delete($article->thumbnail);
+            // Dapatkan path relatif dari URL lengkap
+            $path = str_replace(asset('storage/'), '', $article->getRawOriginal('thumbnail'));
+            Storage::disk('public')->delete($path);
         }
 
         return $article->delete();
@@ -63,22 +81,27 @@ class ArticleRepository
 
     public function findBySlug($slug)
     {
-        return $this->model->where('slug', $slug)->firstOrFail();
+        $article = $this->model->where('slug', $slug)->firstOrFail();
+        
+        // Fix thumbnail URL
+        if ($article->thumbnail && !str_starts_with($article->thumbnail, 'http')) {
+            $article->thumbnail = asset('storage/' . $article->thumbnail);
+        }
+        
+        return $article;
     }
 
     public function updateBySlug($slug, array $data)
     {
         $article = $this->findBySlug($slug);
 
-        // Only update thumbnail if a new file is uploaded
         if (isset($data['thumbnail']) && $data['thumbnail'] !== null) {
             if ($article->thumbnail) {
-                Storage::delete($article->thumbnail);
+                // Dapatkan path relatif dari URL lengkap
+                $oldPath = str_replace(asset('storage/'), '', $article->getRawOriginal('thumbnail'));
+                Storage::disk('public')->delete($oldPath);
             }
             $data['thumbnail'] = $this->storeThumbnail($data['thumbnail']);
-        } else {
-            // Remove thumbnail from data if no new file is uploaded
-            unset($data['thumbnail']);
         }
 
         $article->update($data);
@@ -90,7 +113,9 @@ class ArticleRepository
         $article = $this->findBySlug($slug);
 
         if ($article->thumbnail) {
-            Storage::delete($article->thumbnail);
+            // Dapatkan path relatif dari URL lengkap
+            $path = str_replace(asset('storage/'), '', $article->getRawOriginal('thumbnail'));
+            Storage::disk('public')->delete($path);
         }
 
         return $article->delete();
@@ -98,6 +123,7 @@ class ArticleRepository
 
     private function storeThumbnail($file)
     {
+        // Simpan ke storage/app/public/thumbnails
         return $file->store('thumbnails', 'public');
     }
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, Head } from '@inertiajs/react';
+import { Link, Head, router } from '@inertiajs/react';
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
   const sliderImages = [
@@ -16,6 +16,25 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleAuthClick = (path) => {
+    if (auth?.user) {
+      // Debug role
+      console.log('User roles:', auth.user.roles);
+      
+      // Cek apakah user memiliki role 'users-access'
+      const hasUserAccess = auth.user.roles.some(role => role.name === 'users-access');
+      
+      if (hasUserAccess) {
+        router.get(route('apps.user.dashboard'));
+      } else {
+        router.get(route('apps.dashboard'));
+      }
+    } else {
+      // Jika belum login, arahkan ke halaman register/login
+      router.get(route(path));
+    }
+  };
 
   return (
     <>
@@ -49,18 +68,18 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
             {/* Buttons */}
             <div className="flex flex-col items-center lg:items-start space-y-3">
-              <Link
-                href={route('register')}
+              <button
+                onClick={() => handleAuthClick('register')}
                 className="w-full lg:max-w-lg h-[40px] bg-[#DD661D] text-white text-center py-2 rounded font-medium hover:bg-[#BB551A] transition"
               >
                 Mulai
-              </Link>
-              <Link
-                href={route('login')}
+              </button>
+              <button
+                onClick={() => handleAuthClick('login')}
                 className="w-full lg:max-w-lg border border-[#DD661D] text-center py-2 rounded text-gray-600 font-medium hover:bg-[#BB551A] hover:text-white transition"
               >
                 Login
-              </Link>
+              </button>
             </div>
           </div>
         </div>

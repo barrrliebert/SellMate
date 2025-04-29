@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { IconCategory2, IconBook, IconVideo, IconArticle } from '@tabler/icons-react';
+import { IconCategory2, IconBook, IconVideo, IconArticle, IconUsers } from '@tabler/icons-react';
 
 export default function SpeedDial({ isUserAccess, className = '', isOpenByDefault = false, isMediumScreen = false }) {
     const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(isOpenByDefault);
@@ -38,7 +38,7 @@ export default function SpeedDial({ isUserAccess, className = '', isOpenByDefaul
         <div className={`relative ${className}`}>
             <div className="relative ml-2.5 mt-2">
                 {/* Container with background */}
-                <div className={`absolute -inset-3 ${bgColor} rounded-full transition-all duration-300 ${isSpeedDialOpen ? userAccess ? 'h-[160px]' : 'h-[220px]' : 'h-[44px]'}`}></div>
+                <div className={`absolute -inset-3 ${bgColor} rounded-full transition-all duration-300 ${isSpeedDialOpen ? userAccess ? 'h-[160px]' : 'h-[260px]' : 'h-[44px]'}`}></div>
                 
                 {/* Speed Dial Options */}
                 <div className={`absolute top-full left-0 w-full transition-all duration-200 ${isSpeedDialOpen ? 'opacity-100 translate-y-0 pt-2 pb-2' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
@@ -82,6 +82,13 @@ export default function SpeedDial({ isUserAccess, className = '', isOpenByDefaul
                                         className="w-6 h-6"
                                     />
                                     <span className="text-[10px] font-medium">Home</span>
+                                </Link>
+                                <Link 
+                                    href="/apps/users" 
+                                    className={`flex flex-col items-center gap-1 hover:scale-110 transition-transform ${getLinkStyles('/apps/users')}`}
+                                >
+                                    <IconUsers size={20} strokeWidth={1.5} />
+                                    <span className="text-[10px] font-medium">Users</span>
                                 </Link>
                                 <Link 
                                     href="/apps/products" 

@@ -4,6 +4,7 @@ import Button from '@/Components/Button'
 import Search from '@/Components/Search';
 import Table from '@/Components/Table';
 import Checkbox from '@/Components/Checkbox';
+import Pagination from '@/Components/Pagination';
 import Swal from 'sweetalert2';
 import AppLayout from '@/Layouts/AppLayout'
 import hasAnyPermission from '@/Utils/Permissions';
@@ -62,7 +63,7 @@ export default function Index() {
     return (
         <>
             <Head title='Pengguna'/>
-            <div className='mb-2'>
+            <div className='mb-2 mt-2'>
                 <div className='flex justify-between items-center gap-2'>
                     <div className='flex flex-row gap-2 items-center'>
                         {hasAnyPermission(['users-create']) &&
@@ -177,6 +178,7 @@ export default function Index() {
                         }
                     </Table.Tbody>
                 </Table>
+                <Pagination links={users.links} />
             </Table.Card>
         </>
     )

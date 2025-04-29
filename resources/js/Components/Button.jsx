@@ -60,7 +60,7 @@ export default function Button({className, icon, label, type, href, url, id, var
             }
             {type === 'submit' &&
                 <button type='submit' className={clsx(styleButton, className, variants)} {...props}>
-                    {icon} <span className="hidden sm:block">{label}</span>
+                    {icon} <span>{label}</span>
                 </button>
             }
             {type === 'delete' &&

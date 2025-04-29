@@ -1,7 +1,25 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
-export default function Index() {
+export default function Index({ auth }) {
+    const handleStart = () => {
+        if (auth?.user) {
+            // Debug role
+            console.log('User roles:', auth.user.roles);
+            
+            // Cek apakah user memiliki role 'users-access'
+            const hasUserAccess = auth.user.roles.some(role => role.name === 'users-access');
+            
+            if (hasUserAccess) {
+                router.get(route('apps.user.dashboard'));
+            } else {
+                router.get(route('apps.dashboard'));
+            }
+        } else {
+            router.get(route('admin.login'));
+        }
+    };
+
     return (
         <>
             <Head title="SellMate" />
@@ -20,12 +38,12 @@ export default function Index() {
                                     pendapatan tefa tertata<br />
                                     bersama SellMate
                                 </h2>
-                                <Link
-                                    href={route('admin.login')}
+                                <button
+                                    onClick={handleStart}
                                     className="inline-block bg-[#DD661D] text-white px-8 text-center w-1/2 py-3 rounded-lg text-lg font-medium hover:bg-[#BB551A] transition-colors"
                                 >
                                     Mulai
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </div>

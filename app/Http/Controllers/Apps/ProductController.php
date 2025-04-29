@@ -66,7 +66,8 @@ class ProductController extends Controller implements HasMiddleware
         if ($request->hasFile('foto_produk')) {
             $image = $request->file('foto_produk');
             $filename = Str::random(32) . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/products', $filename);
+            // Simpan ke storage/app/public/products
+            $image->storeAs('products', $filename, 'public');
         }
 
         // create product
@@ -103,10 +104,13 @@ class ProductController extends Controller implements HasMiddleware
             // upload new image
             $image = $request->file('foto_produk');
             $filename = Str::random(32) . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/products', $filename);
+            // Simpan ke storage/app/public/products
+            $image->storeAs('products', $filename, 'public');
 
-            // delete old image
-            Storage::delete('public/products/'.$product->foto_produk);
+            // delete old image if exists
+            if ($product->getRawOriginal('foto_produk')) {
+                Storage::disk('public')->delete('products/' . $product->getRawOriginal('foto_produk'));
+            }
 
             // update product with new image
             $product->update([
@@ -141,8 +145,8 @@ class ProductController extends Controller implements HasMiddleware
         $product = Product::findOrFail($id);
 
         // delete image if exists
-        if ($product->foto_produk) {
-            Storage::delete('public/products/'.$product->getRawOriginal('foto_produk'));
+        if ($product->getRawOriginal('foto_produk')) {
+            Storage::disk('public')->delete('products/' . $product->getRawOriginal('foto_produk'));
         }
 
         // delete product

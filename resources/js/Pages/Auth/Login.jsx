@@ -124,6 +124,16 @@ export default function Login({ status, canResetPassword }) {
                                 )}
                             </div>
 
+                            
+                            {canResetPassword && (
+                                    <Link
+                                        href={route('password.request')}
+                                        className="text-sm text-[#DD661D] hover:text-[#BB551A] transition"
+                                    >
+                                        Forgot your password?
+                                    </Link>
+                                )}
+
                             <div className="w-full flex flex-col items-center lg:items-start space-y-3">
                                 <button
                                     type="submit"

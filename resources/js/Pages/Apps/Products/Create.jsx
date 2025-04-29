@@ -174,7 +174,7 @@ export default function Create() {
                             type="submit"
                             label={processing ? "Menyimpan..." : "Simpan"}
                             disabled={processing}
-                            className="bg-purple-500 text-white disabled:opacity-50"
+                            className="bg-purple-500 text-white disabled:opacity-50 w-full sm:w-auto"
                         />
                     </div>
                 </form>

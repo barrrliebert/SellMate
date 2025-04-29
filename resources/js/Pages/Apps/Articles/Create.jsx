@@ -67,7 +67,7 @@ export default function Create() {
 
             <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Left Column - Informasi video */}
                         <div className="border border-[#D4A8EF] dark:border-[#D4A8EF] rounded-xl p-4">
                             <div className="space-y-6">
@@ -199,7 +199,7 @@ export default function Create() {
                             type="submit"
                             label={processing ? "Menyimpan..." : "Simpan"}
                             disabled={processing}
-                            className="bg-[#AA51DF] hover:bg-indigo-700 disabled:opacity-50"
+                            className="bg-[#AA51DF] hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto"
                         />
                     </div>
                 </form>

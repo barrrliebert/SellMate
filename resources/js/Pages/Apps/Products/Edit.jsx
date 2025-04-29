@@ -178,7 +178,7 @@ export default function Edit({ product }) {
                             type="submit"
                             label={processing ? "Menyimpan..." : "Simpan Perubahan"}
                             disabled={processing}
-                            className="bg-purple-500 text-white hover:bg-purple-600 disabled:opacity-50"
+                            className="bg-purple-500 text-white hover:bg-purple-600 disabled:opacity-50 w-full sm:w-auto"
                         />
                     </div>
                 </form>

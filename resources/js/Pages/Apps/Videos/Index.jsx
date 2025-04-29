@@ -76,9 +76,7 @@ export default function Index({ videos, flash }) {
         videos?.forEach((video) => {
             if (!thumbnails[video.id] && !loadingThumbnails[video.id]) {
                 const videoElement = document.createElement('video');
-                videoElement.src = video.video_file.startsWith('http')
-                    ? video.video_file
-                    : `/storage/${video.video_file}`;
+                videoElement.src = video.video_file;
                 videoElement.preload = 'metadata';
                 videoElement.onloadedmetadata = () => handleVideoLoad(videoElement, video.id);
             }
@@ -140,7 +138,20 @@ export default function Index({ videos, flash }) {
     };
 
     const handleTogglePlay = (id) => {
-        setPlayingVideoId((prev) => (prev === id ? null : id));
+        if (playingVideoId === id) {
+            const video = videoRefs.current[id];
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        } else {
+            // Stop previous video if any
+            if (playingVideoId && videoRefs.current[playingVideoId]) {
+                videoRefs.current[playingVideoId].pause();
+            }
+            setPlayingVideoId(id);
+        }
     };
 
     const handleGenerateLink = (video) => {
@@ -153,101 +164,118 @@ export default function Index({ videos, flash }) {
     };
 
     return (
-        <div className="lg:p-0 p-4">
-            <Head title="Videos" />
+        <div className="px-4 sm:px-0">
+            <Head title="Katalog Video" />
             <Toaster position="top-right" />
 
-            <div className="flex justify-between items-center mb-10">
-                <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-10 mt-6 sm:mt-0">
+                <div className="mb-4 sm:mb-0">
                     <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Katalog Video</h1>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Kelola video dengan mudah</p>
                 </div>
                 {hasAnyPermission(["videos-create"]) && (
                     <Link
                         href="/apps/videos/create"
-                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-purple-700 transition"
+                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-purple-700 transition w-full sm:w-auto text-center sm:text-left"
                     >
                         Tambah Video
                     </Link>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {(Array.isArray(videos) ? videos : []).map((video) => (
-                    <div key={video.id} className="relative border border-[#D4A8EF] p-4 bg-white rounded-2xl shadow-md">
-                        <div className="relative mb-4 rounded-2xl overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px] cursor-pointer">
-                            {loadingThumbnails[video.id] ? (
-                                <div className="absolute inset-0 animate-pulse bg-gray-200 dark:bg-gray-700" />
-                            ) : thumbnails[video.id] ? (
-                                <img
-                                    src={thumbnails[video.id]}
-                                    alt={video.title}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-                                    <IconPlayerPlay size={48} className="text-gray-400" />
-                                </div>
-                            )}
-                            
-                            {/* Play button overlay */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-opacity">
-                                <IconPlayerPlay size={48} className="text-white opacity-0 hover:opacity-100 transition-opacity" />
-                            </div>
-                            
-                            {/* Duration badge */}
-                            {durations[video.id] && (
-                                <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                                    {durations[video.id]}
-                                </div>
-                            )}
-                        </div>
-
-                        <h3 className="font-semibold text-lg mb-2 text-left text-gray-900 dark:text-white">
-                            {video.title}
-                        </h3>
-
-                        <span className="block text-sm text-gray-800 dark:text-gray-400">
-                            {video.source}
-                        </span>
-
-                        {/* Tombol Aksi */}
-                        <div className="flex gap-2 justify-end mt-4">
-                            {/* Tombol Generate Link */}
-                            <button
-                                onClick={() => handleGenerateLink(video)}
-                                className="text-indigo-900 p-2 rounded-full hover:bg-indigo-200 transition transform hover:scale-110"
+                    <div key={video.id} className="mx-auto sm:mx-0 w-full max-w-[370px]">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 flex flex-col border border-[#D4A8EF] dark:border-gray-900 shadow-sm">
+                            <div 
+                                className="relative mb-4 rounded-2xl overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 h-[200px] cursor-pointer"
+                                onClick={() => handleTogglePlay(video.id)}
                             >
-                                <IconLink size={20} />
-                            </button>
-
-                            {/* Tombol Edit */}
-                            {hasAnyPermission(["videos-update"]) && (
-                                <button
-                                    onClick={() => handleEdit(video.id)}
-                                    className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
-                                >
-                                    <img 
-                                        src="/images/edit.svg" 
-                                        alt="Edit Icon" 
-                                        className="w-[26px] h-[26px]"
+                                {playingVideoId === video.id ? (
+                                    <video
+                                        ref={el => videoRefs.current[video.id] = el}
+                                        src={video.video_file}
+                                        className="w-full h-full object-cover"
+                                        controls
+                                        autoPlay
                                     />
-                                </button>
-                            )}
+                                ) : (
+                                    <>
+                                        {loadingThumbnails[video.id] ? (
+                                            <div className="absolute inset-0 animate-pulse bg-gray-200 dark:bg-gray-700" />
+                                        ) : thumbnails[video.id] ? (
+                                            <img
+                                                src={thumbnails[video.id]}
+                                                alt={video.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <IconPlayerPlay size={48} className="text-gray-400" />
+                                            </div>
+                                        )}
+                                        
+                                        {/* Play button overlay */}
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-30 transition-opacity">
+                                            <IconPlayerPlay size={48} className="text-white opacity-0 hover:opacity-100 transition-opacity" />
+                                        </div>
+                                        
+                                        {/* Duration badge */}
+                                        {durations[video.id] && (
+                                            <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+                                                {durations[video.id]}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
 
-                            {/* Tombol Hapus */}
-                            {hasAnyPermission(["videos-delete"]) && (
+                            <h3 className="font-semibold text-lg mb-2 text-left text-gray-900 dark:text-white">
+                                {video.title}
+                            </h3>
+
+                            <span className="block text-sm text-gray-800 dark:text-gray-400">
+                                {video.source}
+                            </span>
+
+                            {/* Tombol Aksi */}
+                            <div className="flex gap-2 justify-end mt-auto pt-4">
+                                {/* Tombol Generate Link */}
                                 <button
-                                    onClick={() => handleDelete(video.id)}
-                                    className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
+                                    onClick={() => handleGenerateLink(video)}
+                                    className="text-indigo-900 p-2 rounded-full hover:bg-indigo-200 transition transform hover:scale-110"
                                 >
-                                    <img 
-                                        src="/images/delete.svg" 
-                                        alt="Delete Icon" 
-                                        className="w-[26] h-[26px]"
-                                    />
+                                    <IconLink size={20} />
                                 </button>
-                            )}
+
+                                {/* Tombol Delete */}
+                                {hasAnyPermission(["videos-delete"]) && (
+                                    <button
+                                        onClick={() => handleDelete(video.id)}
+                                        className="text-red-900 p-2 rounded-full hover:bg-red-200 transition transform hover:scale-110"
+                                    >
+                                        <img 
+                                            src="/images/delete.svg" 
+                                            alt="Delete Icon" 
+                                            className="w-[26px] h-[26px]"
+                                        />
+                                    </button>
+                                )}
+
+                                {/* Tombol Edit */}
+                                {hasAnyPermission(["videos-update"]) && (
+                                    <button
+                                        onClick={() => handleEdit(video.id)}
+                                        className="text-gray-700 p-2 rounded-full hover:bg-gray-400 transition transform hover:scale-110"
+                                    >
+                                        <img 
+                                            src="/images/edit.svg" 
+                                            alt="Edit Icon" 
+                                            className="w-[26px] h-[26px]"
+                                        />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -256,4 +284,4 @@ export default function Index({ videos, flash }) {
     );
 }
 
-Index.layout = (page) => <AppLayout children={page} />;
+Index.layout = page => <AppLayout children={page} />;

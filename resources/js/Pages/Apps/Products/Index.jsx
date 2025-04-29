@@ -63,20 +63,20 @@ export default function Index({ products, flash }) {
     };
 
     return (
-        <>
+        <div className="px-4 sm:px-0">
             <Head title="Katalog Produk" />
             <Toaster position="top-right" />
 
             {/* Header Katalog Produk */}
-            <div className="flex justify-between items-center mb-10">
-                <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-10 mt-6 sm:mt-0">
+                <div className="mb-4 sm:mb-0">
                     <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Katalog Produk</h1>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Kelola produk unggulan tefa dengan mudah</p>
                 </div>
                 {hasAnyPermission(["products-create"]) && (
                     <Link
                         href="/apps/products/create"
-                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-purple-700 transition"
+                        className="bg-[#AA51DF] text-white px-4 py-2 rounded-full hover:bg-purple-700 transition w-full sm:w-auto text-center sm:text-left"
                     >
                         Tambah Produk
                     </Link>
@@ -84,10 +84,10 @@ export default function Index({ products, flash }) {
             </div>
 
             {/* Daftar Produk */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {products.data.map((product) => (
-                    <div key={product.id} className="w-[270px] h-[377px]">
-                        <div className="bg-white border-2 border-[#D4A8EF] rounded-2xl p-4 sm:p-4 flex flex-col h-full">
+                    <div key={product.id} className="mx-auto sm:mx-0 w-full max-w-[270px]">
+                        <div className="bg-white border-2 border-[#D4A8EF] rounded-2xl p-4 flex flex-col h-full">
                             
                             {/* Gambar Produk */}
                             <div className="mb-2 rounded-xl overflow-hidden w-full h-48 sm:h-52">
@@ -166,8 +166,8 @@ export default function Index({ products, flash }) {
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 }
 
-Index.layout = (page) => <AppLayout children={page} />;
+Index.layout = page => <AppLayout children={page} />;

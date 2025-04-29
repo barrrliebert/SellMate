@@ -20,8 +20,8 @@ export default function Edit() {
     });
 
     const handleTargetChange = (value) => {
-        const numValue = parseInt(value) || MIN_TARGET;
-        if (numValue >= data.min_target && numValue <= data.max_target) {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue) && numValue >= data.min_target && numValue <= data.max_target) {
             setData('total_target', numValue);
         }
     };
@@ -124,9 +124,21 @@ useEffect(() => {
         <>
             <Head>
                 <title>{existingTarget ? 'Edit Target' : 'Buat Target'}</title>
+                <style>{`
+                    /* Hide scrollbar for Chrome, Safari and Opera */
+                    ::-webkit-scrollbar {
+                        display: none;
+                    }
+                    
+                    /* Hide scrollbar for IE, Edge and Firefox */
+                    * {
+                        -ms-overflow-style: none;  /* IE and Edge */
+                        scrollbar-width: none;  /* Firefox */
+                    }
+                `}</style>
             </Head>
 
-            <div className="min-h-screen bg-white dark:bg-gray-950">
+            <div className="min-h-screen bg-white dark:bg-gray-950 overflow-auto">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
                     <div className="flex items-center gap-4 mb-6">
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
@@ -203,22 +215,27 @@ useEffect(() => {
                                     className="bg-[#D4A8EF] text-white text-sm px-3 py-1 rounded-full inline-block dark:bg-purple-900 dark:text-purple-300 absolute z-10 transform -translate-x-1/2"
                                     style={{ 
                                         left: `${calculateProgress()}%`,
-                                        top: '-34px'
+                                        top: '-34px',
+                                        transition: 'left 0s'
                                     }}
                                 >
                                     {formatRupiah(data.total_target)}
                                 </div>
-                                    <div className="h-[34px] bg-purple-100 dark:bg-purple-900/50 rounded-full overflow-hidden">
-                                        <div 
-                                        className="h-full bg-[#AA51DF] rounded-lg transition-all duration-150"
-                                        style={{ width: `${calculateProgress()}%` }}
+                                <div className="h-[34px] bg-purple-100 dark:bg-purple-900/50 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-[#AA51DF] rounded-lg"
+                                        style={{ 
+                                            width: `${calculateProgress()}%`,
+                                            transition: 'width 0s'
+                                        }}
                                     />
                                 </div>
                                 <div 
-                                    className="absolute top-1/2 -translate-y-1/2 w-[17px] h-[43px] bg-[#AA51DF] dark:bg-[#AA51DF] rounded-full transition-all duration-150 -translate-x-1/2 cursor-pointer"
+                                    className="absolute top-1/2 -translate-y-1/2 w-[17px] h-[43px] bg-[#AA51DF] dark:bg-[#AA51DF] rounded-full -translate-x-1/2 cursor-pointer"
                                     style={{ 
                                         left: `${calculateProgress()}%`,
-                                        top: '50%'
+                                        top: '50%',
+                                        transition: 'left 0s'
                                     }}
                                 />
                                 <input

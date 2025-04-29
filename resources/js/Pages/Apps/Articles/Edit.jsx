@@ -20,7 +20,7 @@ export default function Edit({ article }) {
     });
 
     const [previewThumbnail, setPreviewThumbnail] = useState(
-        article.thumbnail ? `/storage/${article.thumbnail}` : null
+        article.thumbnail ? (article.thumbnail.startsWith('http') ? article.thumbnail : `/storage/${article.thumbnail}`) : null
     );
 
     const handleSubmit = (e) => {
@@ -69,7 +69,7 @@ export default function Edit({ article }) {
 
             <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-md p-4">
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {/* Left Column */}
                         <div className="border border-[#D4A8EF] rounded-xl p-4 space-y-6">
                             <label className="text-2xl font-semibold text-gray-900">
@@ -167,7 +167,7 @@ export default function Edit({ article }) {
                             type="submit"
                             label={processing ? "Menyimpan..." : "Simpan Perubahan"}
                             disabled={processing}
-                            className="bg-[#AA51DF] hover:bg-indigo-700 disabled:opacity-50"
+                            className="bg-[#AA51DF] hover:bg-indigo-700 disabled:opacity-50 w-full sm:w-auto"
                         />
                     </div>
                 </form>

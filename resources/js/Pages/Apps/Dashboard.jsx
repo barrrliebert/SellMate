@@ -523,28 +523,30 @@ export default function Dashboard({ auth }) {
             <Head title='Dashboard'/>
             
             {/* Headlines */}
-            <div className='px-4 lg:px-0 mb-6 mt-6 md:mt-0 flex justify-between items-center'>
-                <div>
-                    <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-200'>
-                    Dashboard
-                </h1>
-                <p className='text-gray-600 dark:text-gray-400 text-sm'>
-                    Tetap monitoring progress dan update aktivitas pendapatan Tefa
-                </p>
+            <div className='px-4 lg:px-0 mb-6 mt-6 md:mt-0 flex flex-col sm:flex-row justify-between sm:items-center'>
+                <div className="mb-4 sm:mb-0">
+                    <h1 className='text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200'>
+                        Dashboard
+                    </h1>
+                    <p className='text-gray-600 dark:text-gray-400 text-sm mt-1'>
+                        Tetap monitoring progress dan update aktivitas pendapatan Tefa
+                    </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                     {/* Date Range Picker */}
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                         <button
                             onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-                            className="flex items-center gap-2 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200"
+                            className="flex items-center justify-between gap-2 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 w-full sm:w-auto"
                         >
-                            <IconCalendar size={16} className="text-gray-500" />
-                            <span className="min-w-[140px]">{formatDateRange()}</span>
+                            <div className="flex items-center gap-2">
+                                <IconCalendar size={16} className="text-gray-500 flex-shrink-0" />
+                                <span className="truncate">{formatDateRange()}</span>
+                            </div>
                             {exportDateRange[0].startDate && exportDateRange[0].endDate && (
                                 <IconX
                                     size={16}
-                                    className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                                    className="text-gray-500 hover:text-gray-700 cursor-pointer flex-shrink-0"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setExportDateRange([{
@@ -561,7 +563,7 @@ export default function Dashboard({ auth }) {
                         {isDatePickerOpen && (
                             <div
                                 ref={datePickerRef}
-                                className="absolute z-50 mt-2"
+                                className="absolute z-50 mt-2 right-0"
                             >
                                 <DateRange
                                     onChange={item => setExportDateRange([item.selection])}
@@ -574,10 +576,10 @@ export default function Dashboard({ auth }) {
                     </div>
 
                     {/* Export Button */}
-                    <Menu as="div" className="relative">
+                    <Menu as="div" className="relative w-full sm:w-auto">
                         <Menu.Button 
                             disabled={exportLoading}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 disabled:opacity-70"
+                            className="inline-flex items-center justify-center gap-2 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-950 border-2 border-[#D4A8EF] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors duration-200 disabled:opacity-70 w-full sm:w-auto"
                         >
                             {exportLoading ? 'Mengexport...' : (
                                 <>

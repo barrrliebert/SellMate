@@ -7,14 +7,24 @@ export default function Detail({ type }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState('date'); // 'date' or '1month', '3month', '6month', '12month'
-    const [selectedDate, setSelectedDate] = useState(() => {
+    
+    // Default to start of the week
+    const [startDate, setStartDate] = useState(() => {
         const today = new Date();
         const day = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
         const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
         return new Date(today.setDate(diff));
     });
+    
+    // Default to today's date
+    const [endDate, setEndDate] = useState(new Date());
+    
+    // Flag to track if end date has been manually selected
+    const [endDateSelected, setEndDateSelected] = useState(false);
+    
+    const [showStartCalendar, setShowStartCalendar] = useState(false);
+    const [showEndCalendar, setShowEndCalendar] = useState(false);
     const [sliderView, setSliderView] = useState('weekly'); // 'weekly' or 'monthly'
-    const [showCalendar, setShowCalendar] = useState(false);
     const [isSliding, setIsSliding] = useState(false);
     const [touchStartX, setTouchStartX] = useState(0);
     const [touchEndX, setTouchEndX] = useState(0);
@@ -25,7 +35,8 @@ export default function Detail({ type }) {
     const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
 
     // Define clickOutside ref
-    const calendarRef = useRef(null);
+    const startCalendarRef = useRef(null);
+    const endCalendarRef = useRef(null);
     const sliderRef = useRef(null);
 
     const endpoints = {
@@ -42,16 +53,19 @@ export default function Detail({ type }) {
 
     useEffect(() => {
         fetchData();
-    }, [type, viewMode, selectedDate, currentPage]);
+    }, [type, viewMode, startDate, endDate, currentPage]);
 
     useEffect(() => {
-        setViewMode('week');
+        setViewMode('date');
     }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (calendarRef.current && !calendarRef.current.contains(event.target)) {
-                setShowCalendar(false);
+            if (startCalendarRef.current && !startCalendarRef.current.contains(event.target)) {
+                setShowStartCalendar(false);
+            }
+            if (endCalendarRef.current && !endCalendarRef.current.contains(event.target)) {
+                setShowEndCalendar(false);
             }
         };
 
@@ -73,8 +87,8 @@ export default function Detail({ type }) {
                     params.filter_type = 'week';
                 } else if (viewMode === 'date') {
                     params.filter_type = 'custom';
-                    params.start_date = selectedDate.toISOString().split('T')[0];
-                    params.end_date = new Date().toISOString().split('T')[0];
+                    params.start_date = startDate.toISOString().split('T')[0];
+                    params.end_date = endDate.toISOString().split('T')[0];
                 } else if (viewMode.includes('month')) {
                     params.filter_type = 'custom';
                     const monthsBack = parseInt(viewMode);
@@ -368,15 +382,18 @@ export default function Detail({ type }) {
 
     // Date navigation components
     const handleDateSelect = (date) => {
-        setSelectedDate(date);
-        setShowCalendar(false);
+        setStartDate(date);
+        setEndDate(date);
+        setShowStartCalendar(false);
+        setShowEndCalendar(false);
         setSliderDate(date);
     };
 
     const handleSlideChange = (slide) => {
         setIsSliding(slide);
         // Reset tambahan
-        setShowCalendar(false);
+        setShowStartCalendar(false);
+        setShowEndCalendar(false);
         
         // Atur mode tampilan sesuai slide
         if (!slide) { // Slide pertama (tanggal ke today)
@@ -595,16 +612,16 @@ export default function Detail({ type }) {
         );
     };
 
+    const formatDateButton = (date) => {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = date.toLocaleDateString('id-ID', { month: 'short' });
+        const year = date.getFullYear().toString().slice(-2);
+        const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+        return `${day} ${capitalizedMonth} ${year}`;
+    };
+
     const renderDateNavigation = () => {
         if (sliderView === 'weekly') {
-            const formatDateButton = (date) => {
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = date.toLocaleDateString('id-ID', { month: 'short' });
-                const year = date.getFullYear().toString().slice(-2);
-                const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
-                return `${day} ${capitalizedMonth} ${year}`;
-            };
-
             return (
                 <div className="fixed bottom-0 left-0 right-0">
                     <div className="w-full relative">
@@ -634,23 +651,27 @@ export default function Detail({ type }) {
                                     <div className="bg-white rounded-full flex items-center h-[30px] relative border border-[#EDA375] max-w-[382px] mx-auto overflow-hidden">
                                         <button 
                                             onClick={() => {
-                                                setShowCalendar(true);
+                                                setShowStartCalendar(true);
+                                                setShowEndCalendar(false);
                                                 setViewMode('date');
                                             }}
                                             className="flex-1 h-full flex items-center justify-center text-sm text-gray-800"
                                         >
-                                            {formatDateButton(selectedDate)}
+                                            {formatDateButton(startDate)}
                                         </button>
-                                        <div className="h-full w-[30px] bg-[#F3BA9B]"></div>
+                                        <div className="h-full w-[30px] bg-[#F3BA9B] flex items-center justify-center text-gray-600">
+                                            -
+                                        </div>
                                         <button 
                                             onClick={() => {
-                                                setSelectedDate(new Date());
-                                                setShowCalendar(false);
+                                                setShowEndCalendar(true);
+                                                setShowStartCalendar(false);
                                                 setViewMode('date');
+                                                setEndDateSelected(true);
                                             }}
                                             className="flex-1 h-full flex items-center justify-center text-sm text-gray-800"
                                         >
-                                            Today
+                                            {endDateSelected ? formatDateButton(endDate) : "Today"}
                                         </button>
                                     </div>
                                 </div>
@@ -711,17 +732,38 @@ export default function Detail({ type }) {
                             </div>
                         </div>
 
-                        {showCalendar && (
-                            <div ref={calendarRef} className="absolute bottom-full left-6 mb-2 bg-white rounded-lg shadow-lg p-2">
+                        {showStartCalendar && (
+                            <div ref={startCalendarRef} className="absolute bottom-full left-6 mb-2 bg-white rounded-lg shadow-lg p-2 z-20">
+                                <div className="text-sm text-gray-700 mb-1">Tanggal Awal:</div>
                                 <input 
                                     type="date" 
-                                    value={selectedDate.toISOString().split('T')[0]}
+                                    value={startDate.toISOString().split('T')[0]}
                                     onChange={(e) => {
                                         const newDate = new Date(e.target.value);
-                                        setSelectedDate(newDate);
+                                        setStartDate(newDate);
                                         setViewMode('date');
-                                        setShowCalendar(false);
+                                        setShowStartCalendar(false);
                                     }}
+                                    max={endDate.toISOString().split('T')[0]}
+                                    className="p-2 border rounded-lg"
+                                />
+                            </div>
+                        )}
+
+                        {showEndCalendar && (
+                            <div ref={endCalendarRef} className="absolute bottom-full right-6 mb-2 bg-white rounded-lg shadow-lg p-2 z-20">
+                                <div className="text-sm text-gray-700 mb-1">Tanggal Akhir:</div>
+                                <input 
+                                    type="date" 
+                                    value={endDate.toISOString().split('T')[0]}
+                                    onChange={(e) => {
+                                        const newDate = new Date(e.target.value);
+                                        setEndDate(newDate);
+                                        setEndDateSelected(true);
+                                        setViewMode('date');
+                                        setShowEndCalendar(false);
+                                    }}
+                                    min={startDate.toISOString().split('T')[0]}
                                     max={new Date().toISOString().split('T')[0]}
                                     className="p-2 border rounded-lg"
                                 />
